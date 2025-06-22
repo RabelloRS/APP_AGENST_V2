@@ -1,0 +1,80 @@
+research_task:
+  description: "Realizar pesquisa detalhada sobre {topic}"
+  expected_output: "Relatório completo com informações coletadas, fontes e dados relevantes"
+  agent: "technical_researcher"
+  context: ["Pesquisa inicial para coleta de informações"]
+
+analysis_task:
+  description: "Analisar dados coletados sobre {topic} e gerar insights"
+  expected_output: "Análise estruturada com insights, tendências e recomendações"
+  agent: "data_analyst"
+  context: ["Análise dos dados pesquisados"]
+
+writing_task:
+  description: "Criar conteúdo baseado na pesquisa e análise sobre {topic}"
+  expected_output: "Conteúdo bem estruturado, claro e informativo"
+  agent: "technical_writer"
+  context: ["Criação de conteúdo baseado em dados"]
+
+review_task:
+  description: "Revisar e validar o conteúdo criado sobre {topic}"
+  expected_output: "Conteúdo revisado e validado com sugestões de melhoria"
+  agent: "technical_reviewer"
+  context: ["Revisão de qualidade do conteúdo"]
+
+coordination_task:
+  description: "Coordenar o fluxo de trabalho entre os agentes para {topic}"
+  expected_output: "Plano de execução coordenado e cronograma de entregas"
+  agent: "technical_coordinator"
+  context: ["Coordenação geral do projeto"]
+
+excel_analysis_task:
+  description: "Analisar dados de planilhas Excel relacionadas a {topic}"
+  expected_output: "Relatório de análise de dados com comparações e insights"
+  agent: "data_analyst"
+  context: ["Análise específica de dados em planilhas"]
+
+whatsapp_monitoring_task:
+  description: "Monitorar grupo do WhatsApp '{group_name}' em busca de mensagens com arquivos e links de serviços em nuvem"
+  expected_output: "Lista de mensagens encontradas com arquivos e links identificados, incluindo timestamps"
+  agent: "technical_researcher"
+  context: ["Monitoramento contínuo do grupo do WhatsApp"]
+
+file_download_task:
+  description: "Baixar arquivos identificados das mensagens do WhatsApp e links de serviços em nuvem"
+  expected_output: "Arquivos baixados com sucesso e relatório de downloads realizados"
+  agent: "data_analyst"
+  context: ["Download de arquivos de múltiplas fontes"]
+
+file_organization_task:
+  description: "Organizar arquivos baixados, adicionar timestamps aos nomes e criar estrutura de pastas organizada"
+  expected_output: "Arquivos organizados com nomes padronizados incluindo data e hora, estrutura de pastas criada"
+  agent: "technical_coordinator"
+  context: ["Organização e padronização de arquivos"]
+
+# === TASK DE AVALIAÇÃO OBRIGATÓRIA ===
+
+crew_evaluation_task:
+  description: "Avaliar criticamente a performance da crew executada sobre {topic}, analisando a qualidade dos outputs de cada agente, eficácia das ferramentas utilizadas, fluxo de trabalho e colaboração entre agentes. Identificar pontos fortes, fracos e gerar recomendações específicas para melhorar agentes, ferramentas e tarefas."
+  expected_output: |
+    Relatório completo de avaliação contendo:
+    1. RESUMO EXECUTIVO da execução
+    2. ANÁLISE INDIVIDUAL de cada agente (performance, qualidade do output, uso de ferramentas)
+    3. ANÁLISE DO FLUXO DE TRABALHO (eficiência, gargalos, colaboração)
+    4. MÉTRICAS DE QUALIDADE (quantitativas e qualitativas)
+    5. PONTOS FORTES identificados
+    6. PONTOS FRACOS e problemas detectados
+    7. RECOMENDAÇÕES ESPECÍFICAS para:
+       - Melhorias nos agentes (configuração, backstory, tools)
+       - Otimização de ferramentas (substituições, adições)
+       - Refinamento de tarefas (descrições, outputs esperados)
+    8. PRIORIZAÇÃO das melhorias sugeridas
+    9. CONCLUSÕES e próximos passos
+  agent: "crewai_evaluator"
+  context: ["Avaliação final obrigatória da execução da crew"]
+
+simple_evaluation_task:
+  description: "Realizar avaliação básica da crew executada sobre {topic}"
+  expected_output: "Relatório simples de avaliação com principais observações e sugestões básicas"
+  agent: "simple_evaluator"
+  context: ["Avaliação básica para casos de fallback"] 
