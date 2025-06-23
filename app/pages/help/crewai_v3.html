@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia CrewAI: Agentes e Tarefas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Roboto:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0f1f;
+            --primary-blue: #00aaff;
+            --light-cyan: #7fffd4;
+            --card-bg: rgba(16, 24, 48, 0.7);
+            --text-light: #e0e6f0;
+            --text-muted: #8a94a2;
+            --border-glow: rgba(0, 170, 255, 0.25);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            background-image:
+                url('https://www.transparenttextures.com/patterns/cubes.png'),
+                linear-gradient(145deg, var(--bg-dark), #111827);
+            color: var(--text-light);
+        }
+        .sidebar {
+            background-color: rgba(16, 24, 48, 0.5);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border-glow);
+        }
+        .nav-link {
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            color: var(--text-muted);
+        }
+        .nav-link.active, .nav-link:hover {
+            background-color: var(--border-glow);
+            color: var(--text-light);
+            border-left-color: var(--primary-blue);
+            transform: translateX(4px);
+        }
+        .content-section {
+            animation: fadeIn 0.8s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            transition: box-shadow 0.3s, transform 0.3s;
+        }
+        .card:hover {
+            box-shadow: 0 4px 25px rgba(0,170,255,0.13);
+            transform: translateY(-4px);
+        }
+        .card-header {
+            cursor: pointer;
+            padding: 1.1rem 1.5rem 1.1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-title {
+            color: var(--primary-blue);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .card-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s;
+            padding: 0 1.5rem;
+            color: var(--text-muted);
+        }
+        .card-content.open {
+            max-height: 1500px;
+            padding-bottom: 1.5rem;
+        }
+        .code-block {
+            background: #011627;
+            color: #d6deeb;
+            border-radius: 0.5rem;
+            padding: 1rem 1rem 1rem 1.5rem;
+            position: relative;
+            border: 1px solid var(--border-glow);
+            margin-top: 1rem;
+            font-size: 1em;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.8rem;
+            right: 1rem;
+            background: #1a2b4b;
+            color: #7fffd4;
+            border: 1px solid #7fffd4;
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover {
+            background: #7fffd4;
+            color: #0a0f1f;
+        }
+        .tag {
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid;
+            margin-right: 0.3rem;
+            margin-bottom: 0.3rem;
+        }
+        .tag-campo { background: #e8f5e9; color: #43a047; border-color: #43a047;}
+        .tag-variavel { background: #e3f2fd; color: #1976d2; border-color: #1976d2;}
+        .tag-pratica { background: #fff3e0; color: #fb8c00; border-color: #fb8c00;}
+        table { width: 100%; border-collapse: collapse; margin-top: 1.5rem;}
+        th,td { border: 1px solid #3949ab; padding: 0.7rem 1rem;}
+        th { background: #232c4b;}
+        .dica { background: #e8f5e9; color: #222; border-left: 5px solid #43a047; padding: 1rem 1.5rem; border-radius: 0.5rem;}
+        .ref { color: #7fffd4;}
+    </style>
+</head>
+<body class="antialiased">
+<div class="relative min-h-screen md:flex">
+    <div class="md:hidden flex justify-between items-center p-4 bg-gray-900/50 backdrop-blur-sm border-b border-[var(--border-glow)] sticky top-0 z-30">
+        <h1 class="text-xl font-bold text-white">CrewAI: Agentes & Tarefas</h1>
+        <button id="mobile-menu-button" class="text-white focus:outline-none">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+    </div>
+    <aside id="sidebar" class="sidebar w-64 p-6 space-y-2 fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-300 ease-in-out z-40">
+        <h1 class="text-2xl font-bold text-white mb-6" style="font-family: 'Roboto', sans-serif;">CrewAI: Agentes & Tarefas</h1>
+        <nav id="navigation">
+            <a href="#overview" class="nav-link block py-2.5 px-4 rounded font-medium">Visão Geral</a>
+            <a href="#agent" class="nav-link block py-2.5 px-4 rounded font-medium">Estrutura de Agente</a>
+            <a href="#task" class="nav-link block py-2.5 px-4 rounded font-medium">Estrutura de Tarefa</a>
+            <a href="#exemplos" class="nav-link block py-2.5 px-4 rounded font-medium">Exemplos Práticos</a>
+            <a href="#visual" class="nav-link block py-2.5 px-4 rounded font-medium">Resumo Visual</a>
+            <a href="#dicas" class="nav-link block py-2.5 px-4 rounded font-medium">Dicas & Referências</a>
+            <a href="#conclusao" class="nav-link block py-2.5 px-4 rounded font-medium">Conclusão</a>
+        </nav>
+    </aside>
+    <main class="flex-1 p-6 sm:p-8 lg:p-12 overflow-y-auto h-screen">
+        <div id="content-container"></div>
+    </main>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- DATA --- //
+    const sections = {
+        overview: {
+            title: "Visão Geral do CrewAI",
+            html: `
+                <p class="mb-4 text-lg">O <b>CrewAI</b> é um framework para criar equipes de agentes autônomos que colaboram em tarefas complexas. Os principais elementos são:</p>
+                <ul class="mb-4 ml-6 list-disc">
+                    <li><b>Crew</b> (Equipe)</li>
+                    <li><b>Agent</b> (Agente)</li>
+                    <li><b>Task</b> (Tarefa)</li>
+                    <li><b>Tool</b> (Ferramenta, opcional)</li>
+                </ul>
+                <div class="card">
+                    <div class="card-header cursor-pointer"><span class="card-title">Instalação</span></div>
+                    <div class="card-content open"><pre class="code-block">pip install crewai
+pip install crewai-tools</pre></div>
+                </div>
+                <p>O sucesso depende de como você estrutura <b>agentes</b> e <b>tarefas</b>. Este guia aprofunda cada campo, melhores práticas e exemplos reais.</p>
+            `
+        },
+        agent: {
+            title: "Estrutura Profunda dos Agentes (Agent)",
+            html: `
+                <p class="mb-3">O agente é a identidade central do CrewAI, responsável por executar ações e tomar decisões. Definir seus campos corretamente é fundamental para resultados eficazes.</p>
+                ${card('role', 'Papel do agente', 'Define a função central do agente na equipe e sua especialização.', [
+                    tag('campo', 'role'),
+                    tag('variavel', 'Exemplo: "Analista de Dados"')
+                ], `<ul><li>Importância: Direciona decisões e especialização.</li><li>Melhor prática: Seja específico e assertivo.</li></ul>`)}
+
+                ${card('goal', 'Objetivo do agente', 'O objetivo orienta todas as ações do agente e define seu propósito.', [
+                    tag('campo', 'goal'),
+                    tag('variavel', 'Exemplo: "Identificar padrões nos dados de clientes"')
+                ], `<ul><li>Importância: Norteia ações e escolhas.</li><li>Melhor prática: Defina metas claras e mensuráveis.</li></ul>`)}
+
+                ${card('backstory', 'Histórico do agente', 'Contextualiza o agente, moldando seu comportamento, tom e tomada de decisão.', [
+                    tag('campo', 'backstory'),
+                    tag('variavel', 'Exemplo: "Você é formado em estatística e trabalha há 8 anos..."')
+                ], `<ul><li>Importância: Influencia o comportamento do agente.</li><li>Melhor prática: Elabore um histórico realista e detalhado.</li></ul>`)}
+
+                ${card('tools', 'Ferramentas (opcional)', 'Permite ao agente acessar habilidades extras, como ler arquivos ou buscar na web.', [
+                    tag('campo', 'tools'),
+                    tag('variavel', 'Exemplo: [FileReadTool()]')
+                ], `<ul><li>Importância: Dá superpoderes ao agente.</li><li>Melhor prática: Adicione apenas ferramentas necessárias.</li></ul>`)}
+
+                ${card('llm', 'Modelo de linguagem (opcional)', 'Define qual modelo será usado (ex: "gpt-3.5", "gpt-4").', [
+                    tag('campo', 'llm'),
+                    tag('variavel', 'Exemplo: "gpt-4"')
+                ], `<ul><li>Importância: Escolha modelos avançados para tarefas complexas.</li></ul>`)}
+
+                ${card('verbose', 'Modo detalhado (opcional)', 'Exibe detalhes do processamento, útil para depuração.', [
+                    tag('campo', 'verbose'),
+                    tag('variavel', 'Exemplo: verbose=True')
+                ], `<ul><li>Importância: Ative para debug e desative em produção.</li></ul>`)}
+
+                ${card('allow_delegation', 'Permite delegar (opcional)', 'Permite ao agente repassar tarefas.', [
+                    tag('campo', 'allow_delegation'),
+                    tag('variavel', 'Exemplo: allow_delegation=True')
+                ], `<ul><li>Importância: Habilite em times colaborativos.</li></ul>`)}
+
+                <div class="card">
+                    <div class="card-header cursor-pointer"><span class="card-title">Exemplo de agente completo</span></div>
+                    <div class="card-content"><pre class="code-block" id="agent-code">
+from crewai import Agent
+from crewai_tools import FileReadTool
+
+analista = Agent(
+    role="Analista de Inteligência de Mercado",
+    goal="Entregar relatórios detalhados sobre concorrentes do setor automotivo",
+    backstory="Você trabalhou mais de 10 anos no setor automobilístico...",
+    tools=[FileReadTool()],
+    llm="gpt-4",
+    verbose=True,
+    allow_delegation=True
+)
+</pre><button class="copy-btn" data-target="agent-code">Copiar</button></div>
+                </div>
+            `
+        },
+        task: {
+            title: "Estrutura Profunda das Tarefas (Task)",
+            html: `
+                <p class="mb-3">Cada tarefa é um trabalho específico a ser realizado e deve ser atribuída a um agente. Uma boa descrição evita ambiguidades e garante resultados de qualidade.</p>
+                ${card('description', 'Descrição da tarefa', 'Define claramente o que deve ser feito, com contexto e limites.', [
+                    tag('campo', 'description'),
+                    tag('variavel', 'Exemplo: "Analise a planilha vendas_maio.xlsx..."')
+                ], `<ul><li>Importância: Define o escopo da tarefa.</li><li>Melhor prática: Use linguagem objetiva e especifique dados de entrada.</li></ul>`)}
+
+                ${card('agent', 'Agente responsável', 'Define quem executará a tarefa.', [
+                    tag('campo', 'agent'),
+                    tag('variavel', 'Exemplo: agent=analista')
+                ], `<ul><li>Importância: Direciona a execução.</li><li>Melhor prática: Certifique-se que o agente tem expertise.</li></ul>`)}
+
+                ${card('expected_output', 'Saída esperada', 'Define formato e detalhamento mínimo da resposta.', [
+                    tag('campo', 'expected_output'),
+                    tag('variavel', 'Exemplo: "Tabela em Markdown com nomes dos produtos..."')
+                ], `<ul><li>Importância: Serve como checklist para o agente.</li><li>Melhor prática: Especifique formato e exemplos do resultado.</li></ul>`)}
+
+                ${card('context', 'Contexto (opcional)', 'Informações adicionais ou contexto relevante para a execução da tarefa.', [
+                    tag('campo', 'context'),
+                    tag('variavel', 'Exemplo: "Dados coletados do sistema X em 2023"')
+                ], `<ul><li>Importância: Ajuda o agente a entender restrições e cenário.</li></ul>`)}
+
+                ${card('tools', 'Ferramentas adicionais (opcional)', 'Adiciona recursos extras para a tarefa.', [
+                    tag('campo', 'tools'),
+                    tag('variavel', 'Exemplo: [FileReadTool()]')
+                ], `<ul><li>Importância: Use apenas se necessário para a tarefa.</li></ul>`)}
+
+                ${card('parameters', 'Parâmetros (opcional)', 'Parâmetros customizados para a execução da tarefa.', [
+                    tag('campo', 'parameters'),
+                    tag('variavel', 'Exemplo: {"limite": 10, "filtro": "ativo"}')
+                ], `<ul><li>Importância: Permite personalizar a execução.</li></ul>`)}
+
+                ${card('output_format', 'Formato de saída (opcional)', 'Define o formato do resultado (ex: PDF, CSV, Markdown).', [
+                    tag('campo', 'output_format'),
+                    tag('variavel', 'Exemplo: "CSV"')
+                ], `<ul><li>Importância: Garante compatibilidade com outros sistemas.</li></ul>`)}
+
+                ${card('dependencies', 'Dependências (opcional)', 'Lista de tarefas que devem ser concluídas antes desta.', [
+                    tag('campo', 'dependencies'),
+                    tag('variavel', 'Exemplo: ["task_coletar_dados"]')
+                ], `<ul><li>Importância: Controla a ordem de execução.</li></ul>`)}
+
+                ${card('deadline', 'Prazo (opcional)', 'Data ou tempo limite para conclusão da tarefa.', [
+                    tag('campo', 'deadline'),
+                    tag('variavel', 'Exemplo: "2024-06-30"')
+                ], `<ul><li>Importância: Ajuda no planejamento e priorização.</li></ul>`)}
+
+                ${card('status', 'Status (opcional)', 'Estado atual da tarefa (ex: pendente, em andamento, concluída).', [
+                    tag('campo', 'status'),
+                    tag('variavel', 'Exemplo: "pendente"')
+                ], `<ul><li>Importância: Facilita o acompanhamento do progresso.</li></ul>`)}
+
+                <div class="card">
+                    <div class="card-header cursor-pointer"><span class="card-title">Exemplo de tarefa completa</span></div>
+                    <div class="card-content"><pre class="code-block" id="task-code">
+from crewai import Task
+
+tarefa_analise = Task(
+    description="Avalie o arquivo 'clientes_2023.csv', encontre padrões de churn...",
+    agent=analista,
+    expected_output="Relatório em texto detalhado com gráfico de barras...",
+    context="Dados coletados do CRM em maio de 2023",
+    tools=[FileReadTool()],
+    parameters={"limite": 10, "filtro": "ativo"},
+    output_format="Markdown",
+    dependencies=["task_coletar_dados"],
+    deadline="2024-06-30",
+    status="pendente"
+)
+</pre><button class="copy-btn" data-target="task-code">Copiar</button></div>
+                </div>
+            `
+        },
+        exemplos: {
+            title: "Exemplos Práticos",
+            html: `
+                <div class="card">
+                    <div class="card-header cursor-pointer"><span class="card-title">Agente simples</span></div>
+                    <div class="card-content"><pre class="code-block" id="ex1">
+from crewai import Agent
+
+analista_de_dados = Agent(
+    role='Analista de Dados',
+    goal='Gerar insights acionáveis de negócio',
+    backstory="Você trabalha em marketing analisando campanhas.",
+    tools=[],
+    verbose=True
+)
+</pre><button class="copy-btn" data-target="ex1">Copiar</button></div>
+                </div>
+                <div class="card">
+                    <div class="card-header cursor-pointer"><span class="card-title">Agente com ferramenta</span></div>
+                    <div class="card-content"><pre class="code-block" id="ex2">
+from crewai_tools import FileReadTool
+
+leitor_arquivos = Agent(
+    role='Leitor de Arquivos',
+    goal='Extrair informações precisas de arquivos PDF',
+    backstory='Você é um especialista em análise documental.',
+    tools=[FileReadTool()],
+    verbose=False
+)
+</pre><button class="copy-btn" data-target="ex2">Copiar</button></div>
+                </div>
+                <div class="card">
+                    <div class="card-header cursor-pointer"><span class="card-title">Tarefa detalhada</span></div>
+                    <div class="card-content"><pre class="code-block" id="ex3">
+from crewai import Task
+
+tarefa_analisar_vendas = Task(
+    description='Analisar dados de vendas do último mês',
+    agent=analista_de_dados,
+    expected_output='Relatório detalhado com gráficos e insights'
+)
+</pre><button class="copy-btn" data-target="ex3">Copiar</button></div>
+                </div>
+                <div class="card">
+                    <div class="card-header cursor-pointer"><span class="card-title">Equipe com múltiplos agentes e tarefas</span></div>
+                    <div class="card-content"><pre class="code-block" id="ex4">
+from crewai import Crew
+
+pesquisador = Agent(
+    role='Pesquisador',
+    goal='Buscar informações sobre o mercado de IA no Brasil',
+    backstory='Especialista em pesquisa de mercado de tecnologia.',
+    tools=[],
+    verbose=True
+)
+
+redator = Agent(
+    role='Redator',
+    goal='Produzir um relatório de pesquisa claro e sucinto',
+    backstory='Jornalista de tecnologia.',
+    tools=[],
+    verbose=False
+)
+
+task_pesquisar = Task(
+    description='Pesquisar números atualizados do mercado de IA no Brasil.',
+    agent=pesquisador,
+    expected_output='Resumo com os principais números e tendências.'
+)
+
+task_redigir = Task(
+    description='Escrever o relatório de pesquisa baseado nos dados coletados',
+    agent=redator,
+    expected_output='Relatório pronto para publicação.'
+)
+
+equipe_pesquisa = Crew(
+    agents=[pesquisador, redator],
+    tasks=[task_pesquisar, task_redigir],
+    verbose=True
+)
+equipe_pesquisa.kickoff()
+</pre><button class="copy-btn" data-target="ex4">Copiar</button></div>
+                </div>
+            `
+        },
+        visual: {
+            title: "Resumo Visual: Campos e Exemplos",
+            html: `
+                <table>
+                    <tr><th>Nome Amigável</th><th>Nome técnico</th><th>Exemplo</th></tr>
+                    <tr><td>Papel</td><td>role</td><td>'Analista de Dados'</td></tr>
+                    <tr><td>Objetivo</td><td>goal</td><td>'Gerar insights a partir dos dados'</td></tr>
+                    <tr><td>Histórico</td><td>backstory</td><td>'Você é um especialista em BI...'</td></tr>
+                    <tr><td>Ferramentas</td><td>tools</td><td>[FileReadTool()]</td></tr>
+                    <tr><td>Descrição Tarefa</td><td>description</td><td>'Analisar vendas trimestrais'</td></tr>
+                    <tr><td>Agente Responsável</td><td>agent</td><td>analista_de_dados</td></tr>
+                    <tr><td>Saída Esperada</td><td>expected_output</td><td>'Apresentação gerencial com gráficos'</td></tr>
+                    <tr><td>Lista de Agentes</td><td>agents</td><td>[analista_de_dados, redator]</td></tr>
+                    <tr><td>Lista de Tarefas</td><td>tasks</td><td>[task_pesquisar, task_redigir]</td></tr>
+                    <tr><td>Execução</td><td>kickoff</td><td>equipe_analise.kickoff()</td></tr>
+                </table>
+            `
+        },
+        dicas: {
+            title: "Dicas, Melhores Práticas e Referências",
+            html: `
+                <div class="dica mb-4">
+                    <ul>
+                        <li><b>Invista tempo nos campos <code>role</code>, <code>goal</code> e <code>backstory</code> do agente</b> — são a alma da IA e melhoram drasticamente a entrega.</li>
+                        <li><b>Detalhe <code>description</code> e <code>expected_output</code> de cada tarefa</b>. Ambiguidade leva a más respostas.</li>
+                        <li><b>Use ferramentas apenas quando agregarem valor.</b></li>
+                        <li><b>Prefira <code>verbose=True</code> durante testes e treinamento.</b></li>
+                        <li><b>Permita delegação de tarefas</b> para times colaborativos de verdade.</li>
+                    </ul>
+                </div>
+                <h3 class="mt-8 mb-2 text-xl font-bold text-[var(--primary-blue)]">Referências Oficiais e Tutoriais</h3>
+                <ul>
+                    <li><a class="ref" href="https://docs.crewai.com/introduction" target="_blank">Documentação oficial CrewAI</a></li>
+                    <li><a class="ref" href="https://www.studywithgpt.com/pt-br/tutorial/2hsrwk?utm_source=openai" target="_blank">Exemplo prático StudyWithGPT</a></li>
+                    <li><a class="ref" href="https://medium.com/@michel.macario/crewai-um-framework-voltado-para-a-integra%C3%A7%C3%A3o-e-automa%C3%A7%C3%A3o-de-agentes-de-intelig%C3%AAncia-artificial-3bff452cb450?utm_source=openai" target="_blank">Artigo no Medium sobre CrewAI</a></li>
+                    <li><a class="ref" href="https://www.videoresumo.com/automacao/criando-equipes-de-agentes-autonomos-com-crew-ai-um-tutorial-pratico/?utm_source=openai" target="_blank">Tutorial em vídeo CrewAI</a></li>
+                </ul>
+            `
+        },
+        conclusao: {
+            title: "Conclusão",
+            html: `
+                <p class="mb-4 text-lg">A CrewAI permite criar times de agentes autônomos, colaborativos e altamente configuráveis. O segredo está na riqueza dos campos <code>role</code>, <code>goal</code>, <code>backstory</code> e na precisão das tarefas. Combinando boas práticas, exemplos e personalização, você constrói soluções de IA realmente inteligentes.</p>
+                <p class="text-[var(--text-muted)]">Aprofunde, experimente e adapte para seu contexto!</p>
+            `
+        }
+    };
+
+    // --- HELPERS --- //
+    function tag(tipo, txt) {
+        let cls = 'tag-' + tipo;
+        return `<span class="tag ${cls}">${txt}</span>`;
+    }
+    function card(titulo, subtitulo, descricao, tags, detalhes) {
+        let id = 'card-' + Math.random().toString(36).substr(2,5);
+        return `
+        <div class="card">
+            <div class="card-header cursor-pointer"><span class="card-title">${subtitulo}</span><svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+            <div class="card-content">
+                <div class="mb-2">${tags.join(' ')}</div>
+                <div class="mb-2">${descricao}</div>
+                <div class="mb-2">${detalhes}</div>
+            </div>
+        </div>
+        `;
+    }
+
+    // --- RENDER --- //
+    const contentContainer = document.getElementById('content-container');
+    function renderSection(hash) {
+        const key = hash.substring(1) || 'overview';
+        let section = sections[key];
+        if (!section) section = sections['overview'];
+        contentContainer.innerHTML = `<div class="content-section">
+            <h2 class="text-3xl sm:text-4xl font-bold mb-3 text-white" style="font-family: 'Roboto', sans-serif;">${section.title}</h2>
+            ${section.html}
+        </div>`;
+        updateActiveLink(key);
+        attachCardListeners();
+        attachCopyListeners();
+    }
+    function updateActiveLink(key) {
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === `#${key}`);
+        });
+    }
+    // --- CARDS --- //
+    function attachCardListeners() {
+        document.querySelectorAll('.card-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                const content = card.querySelector('.card-content');
+                const icon = header.querySelector('svg');
+                content.classList.toggle('open');
+                icon.classList.toggle('rotate-180');
+            });
+        });
+        // By default, open the first card in each section
+        document.querySelectorAll('.card-content').forEach((c, i) => {
+            if(i===0) c.classList.add('open');
+        });
+    }
+    // --- COPY --- //
+    function attachCopyListeners() {
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                const target = document.getElementById(btn.dataset.target);
+                if(target) {
+                    navigator.clipboard.writeText(target.innerText).then(()=>{
+                        btn.textContent = 'Copiado!';
+                        setTimeout(()=>{ btn.textContent = 'Copiar'; }, 2000);
+                    });
+                }
+            };
+        });
+    }
+    // --- NAVIGATION --- //
+    document.getElementById('navigation').addEventListener('click', (e) => {
+        if (e.target.tagName === 'A') {
+            e.preventDefault();
+            const hash = new URL(e.target.href).hash;
+            if (window.location.hash !== hash) window.location.hash = hash;
+            if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
+        }
+    });
+    window.addEventListener('hashchange', () => renderSection(window.location.hash));
+    // Initial render
+    renderSection(window.location.hash || '#overview');
+    // Mobile menu
+    document.getElementById('mobile-menu-button').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+    });
+});
+</script>
+</body>
+</html>

@@ -9,7 +9,7 @@ from urllib.parse import urlparse, parse_qs
 import numpy as np
 import pandas as pd
 from thefuzz import fuzz, process
-from crewai_tools import SerperDevTool
+from crewai_tools import WebsiteSearchTool
 
 
 def read_excel_column(file_path: str, column_name: str) -> list:
@@ -516,50 +516,29 @@ def organize_files_by_date(files_list: List[Dict[str, Any]], base_path: str) -> 
 
 def simple_research_tool(topic: str) -> str:
     """
-    Ferramenta de pesquisa simples que utiliza o SerperDevTool para pesquisar um tópico.
+    Ferramenta de pesquisa simples que utiliza o WebsiteSearchTool do CrewAI para pesquisar um tópico na web.
     """
     try:
-        import os
-        from crewai_tools import SerperDevTool
-        
-        # Verificar se a API key está disponível
-        api_key = os.getenv('SERPER_API_KEY')
-        if not api_key:
-            return f"Erro: SERPER_API_KEY não configurada no arquivo .env. Por favor, configure a chave da API Serper no arquivo .env"
-        
         # Verificar se o tópico é válido
         if not topic or len(topic.strip()) < 3:
             return f"Erro: Tópico de pesquisa muito curto ou vazio. Forneça um tópico com pelo menos 3 caracteres."
-        
+
         # Criar instância da ferramenta
         try:
-            search_tool = SerperDevTool()
+            search_tool = WebsiteSearchTool()
         except Exception as tool_error:
-            return f"Erro ao inicializar ferramenta de pesquisa: {tool_error}"
-        
-        # Executar pesquisa com timeout e tratamento de erro robusto
+            return f"Erro ao inicializar WebsiteSearchTool: {tool_error}"
+
+        # Executar pesquisa
         try:
-            print(f"🔍 Executando pesquisa para: {topic}")
+            print(f"🔍 Executando pesquisa web para: {topic}")
             result = search_tool.run(topic)
-            
             if result and len(str(result)) > 20:
                 return str(result)
             else:
                 return f"Pesquisa para '{topic}' retornou resultado vazio ou muito curto. Tente reformular a pesquisa."
-                
         except Exception as search_error:
-            error_msg = str(search_error)
-            if "API key" in error_msg.lower():
-                return f"Erro de autenticação: Verifique se a SERPER_API_KEY está correta no arquivo .env"
-            elif "rate limit" in error_msg.lower():
-                return f"Limite de taxa excedido: Aguarde um momento antes de fazer nova pesquisa"
-            elif "timeout" in error_msg.lower():
-                return f"Timeout na pesquisa: Tente novamente com um tópico mais específico"
-            else:
-                return f"Erro na execução da pesquisa para '{topic}': {error_msg}"
-            
-    except ImportError:
-        return f"Erro: SerperDevTool não está disponível. Execute: pip install crewai-tools"
+            return f"Erro na execução da pesquisa para '{topic}': {search_error}"
     except Exception as e:
         return f"Erro geral na pesquisa para '{topic}': {e}"
 

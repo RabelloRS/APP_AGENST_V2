@@ -1,80 +1,462 @@
-research_task:
-  description: "Realizar pesquisa detalhada sobre {topic}"
-  expected_output: "Relatório completo com informações coletadas, fontes e dados relevantes"
-  agent: "technical_researcher"
-  context: ["Pesquisa inicial para coleta de informações"]
+# Arquivo de Configuração de Tarefas para a Equipe de Engenharia e Desenvolvimento
 
-analysis_task:
-  description: "Analisar dados coletados sobre {topic} e gerar insights"
-  expected_output: "Análise estruturada com insights, tendências e recomendações"
-  agent: "data_analyst"
-  context: ["Análise dos dados pesquisados"]
+# --- Tarefas Genéricas de Projeto ---
 
-writing_task:
-  description: "Criar conteúdo baseado na pesquisa e análise sobre {topic}"
-  expected_output: "Conteúdo bem estruturado, claro e informativo"
-  agent: "technical_writer"
-  context: ["Criação de conteúdo baseado em dados"]
+initial_research_task:
+  description: |
+    Conduzir uma pesquisa técnica aprofundada sobre {topic}. 
+    Utilizar as ferramentas de busca na web e em documentos para coletar dados 
+    sobre normas técnicas aplicáveis (ABNT, NBRs), artigos científicos recentes, 
+    patentes existentes e estudos de caso relevantes para o projeto.
+  expected_output: |
+    Um relatório consolidado em formato Markdown contendo:
+    1. Uma lista de todas as normas técnicas pertinentes com links e resumos.
+    2. Resumo dos 5 principais artigos científicos sobre o tema, com análise crítica.
+    3. Relação de patentes relevantes, se houver.
+    4. Análise de 2 a 3 estudos de caso.
+    5. Uma bibliografia completa com todas as fontes consultadas.
+  agent: technical_researcher
 
-review_task:
-  description: "Revisar e validar o conteúdo criado sobre {topic}"
-  expected_output: "Conteúdo revisado e validado com sugestões de melhoria"
-  agent: "technical_reviewer"
-  context: ["Revisão de qualidade do conteúdo"]
+data_analysis_task:
+  description: |
+    Analisar os dados brutos e o relatório de pesquisa sobre {topic}.
+    Utilizar ferramentas de análise de dados para processar planilhas (CSV), 
+    consultar bancos de dados relacionados e extrair tendências, correlações 
+    e anomalias estatísticas.
+  expected_output: |
+    Um painel de análise detalhado contendo:
+    1. Gráficos e visualizações das principais tendências.
+    2. Um relatório estatístico com as principais métricas.
+    3. Uma lista de 3 a 5 insights acionáveis derivados dos dados.
+    4. Validação da qualidade e integridade dos dados analisados.
+  agent: data_analyst
 
-coordination_task:
-  description: "Coordenar o fluxo de trabalho entre os agentes para {topic}"
-  expected_output: "Plano de execução coordenado e cronograma de entregas"
-  agent: "technical_coordinator"
-  context: ["Coordenação geral do projeto"]
+technical_writing_task:
+  description: |
+    Com base na pesquisa inicial e na análise de dados, redigir o documento técnico 
+    principal sobre {topic} (ex: memorial descritivo, relatório técnico, especificação).
+    O texto deve ser claro, conciso, preciso e seguir a terminologia técnica padrão.
+  expected_output: |
+    Um documento final em formato .docx, totalmente formatado, contendo:
+    - Introdução, desenvolvimento, metodologia, resultados e conclusão.
+    - Referências cruzadas para os dados da análise.
+    - Estrutura lógica e linguagem apropriada para o público-alvo (engenheiros).
+  agent: technical_writer
 
-excel_analysis_task:
-  description: "Analisar dados de planilhas Excel relacionadas a {topic}"
-  expected_output: "Relatório de análise de dados com comparações e insights"
-  agent: "data_analyst"
-  context: ["Análise específica de dados em planilhas"]
+technical_review_task:
+  description: |
+    Revisar minuciosamente o documento técnico produzido sobre {topic}.
+    Verificar a precisão dos dados, a conformidade com as normas citadas na pesquisa, 
+    a correção dos cálculos (usando o CodeInterpreterTool se necessário) e a clareza geral da redação.
+  expected_output: |
+    O documento .docx original com comentários e sugestões de revisão, incluindo:
+    - Correções de erros técnicos, gramaticais e de formatação.
+    - Validação da consistência entre o texto e os dados de origem.
+    - Sugestões para melhorar a clareza e a precisão do documento.
+  agent: technical_reviewer
 
-whatsapp_monitoring_task:
-  description: "Monitorar grupo do WhatsApp '{group_name}' em busca de mensagens com arquivos e links de serviços em nuvem"
-  expected_output: "Lista de mensagens encontradas com arquivos e links identificados, incluindo timestamps"
-  agent: "technical_researcher"
-  context: ["Monitoramento contínuo do grupo do WhatsApp"]
+project_coordination_task:
+  description: |
+    Coordenar a execução do projeto {project_name}, garantindo que todas as tarefas sejam atribuídas,
+    os prazos sejam comunicados e o fluxo de trabalho entre os agentes seja contínuo.
+    Monitorar o progresso, ler relatórios de status e facilitar a comunicação entre os especialistas.
+  expected_output: |
+    Um plano de execução do projeto atualizado continuamente, contendo:
+    1. Cronograma de tarefas com responsáveis e prazos.
+    2. Relatório de status semanal consolidando o progresso de todos os agentes.
+    3. Registro de decisões e ações tomadas para resolver gargalos ou conflitos.
+  agent: technical_coordinator
 
-file_download_task:
-  description: "Baixar arquivos identificados das mensagens do WhatsApp e links de serviços em nuvem"
-  expected_output: "Arquivos baixados com sucesso e relatório de downloads realizados"
-  agent: "data_analyst"
-  context: ["Download de arquivos de múltiplas fontes"]
+# --- Tarefas de Engenharia Estrutural e Geotecnia ---
 
-file_organization_task:
-  description: "Organizar arquivos baixados, adicionar timestamps aos nomes e criar estrutura de pastas organizada"
-  expected_output: "Arquivos organizados com nomes padronizados incluindo data e hora, estrutura de pastas criada"
-  agent: "technical_coordinator"
-  context: ["Organização e padronização de arquivos"]
+structural_design_task:
+  description: |
+    Desenvolver o projeto estrutural completo para a edificação {building_type} com {number_of_floors} pavimentos.
+    Realizar a concepção estrutural, análise de cargas (permanentes, acidentais, vento) e o dimensionamento
+    de todos os elementos (lajes, vigas, pilares) em concreto armado, conforme a NBR 6118.
+  expected_output: |
+    Um pacote de projeto estrutural contendo:
+    1. Memorial de cálculo detalhado.
+    2. Plantas de forma, locação de pilares e detalhamento de armaduras para todos os elementos.
+    3. Resumo do quantitativo de materiais (concreto e aço).
+  agent: structural_engineer
 
-# === TASK DE AVALIAÇÃO OBRIGATÓRIA ===
+geotechnical_report_task:
+  description: |
+    Com base nos dados de sondagens de campo fornecidos para o terreno em {location}, elaborar um
+    parecer geotécnico completo para subsidiar os projetos de fundações e contenções.
+  expected_output: |
+    Um relatório geotécnico em PDF contendo:
+    1. Perfil geotécnico do subsolo.
+    2. Parâmetros de resistência e deformabilidade dos solos.
+    3. Análise da capacidade de carga para fundações rasas e profundas.
+    4. Recomendações sobre o tipo de fundação mais adequado e considerações sobre escavações.
+  agent: geotechnical_engineer
+
+foundation_design_task:
+  description: |
+    Elaborar o projeto de fundações para a edificação localizada em {location}, 
+    com base no relatório de sondagem (SPT) fornecido e nas cargas da superestrutura.
+    Analisar os dados do solo, calcular a capacidade de carga e dimensionar o tipo de fundação mais adequado.
+  expected_output: |
+    Um relatório de projeto de fundações em PDF contendo:
+    1. Análise e interpretação do relatório de sondagem.
+    2. Memória de cálculo completa para o dimensionamento da fundação escolhida (ex: sapatas, estacas).
+    3. Plantas de locação e detalhamento das fundações.
+    4. Especificações técnicas dos materiais e do processo executivo.
+  agent: foundation_engineer
+
+retaining_wall_design_task:
+  description: |
+    Projetar uma estrutura de contenção em concreto armado para um talude de {height} metros de altura
+    no local {location}, considerando as características do solo e sobrecargas adjacentes.
+  expected_output: |
+    Um projeto de contenção completo, incluindo:
+    1. Memorial de cálculo com verificação da estabilidade (tombamento, deslizamento, capacidade de carga).
+    2. Dimensionamento e detalhamento das armaduras do muro.
+    3. Especificações do sistema de drenagem.
+  agent: retaining_structures_engineer
+
+bridge_design_task:
+  description: |
+    Desenvolver o projeto estrutural de uma ponte rodoviária com vão de {span_length} metros sobre o rio {river_name}.
+    Realizar a concepção, análise de cargas móveis (trem-tipo TB-45) e o dimensionamento da superestrutura e mesoestrutura.
+  expected_output: |
+    Um projeto completo da Obra de Arte Especial, contendo:
+    1. Memória de cálculo estrutural detalhada.
+    2. Plantas de forma, armadura e aparelhos de apoio.
+    3. Especificações técnicas para construção e materiais.
+  agent: bridge_viaduct_engineer
+
+fem_analysis_task:
+  description: |
+    Realizar uma análise de elementos finitos (FEM) para o componente estrutural {component_name} 
+    do projeto {project_name}. O objetivo é validar o comportamento sob as cargas de serviço e últimas, 
+    e otimizar o seu design.
+  expected_output: |
+    Um relatório de análise FEM contendo:
+    1. Descrição do modelo, malha, materiais e condições de contorno.
+    2. Imagens (plots) de tensões, deformações e deslocamentos.
+    3. Análise crítica dos resultados em comparação com os limites normativos.
+    4. Recomendações de otimização de design, se aplicável.
+  agent: fem_modeling_specialist
+
+# --- Tarefas de Hidráulica, Saneamento e Meio Ambiente ---
+
+hydrological_study_task:
+  description: |
+    Realizar um estudo hidrológico para a bacia hidrográfica do rio {river_name}, na região do projeto {project_name},
+    para determinar a vazão de cheia com tempo de retorno de {return_period} anos.
+  expected_output: |
+    Um relatório de estudo hidrológico contendo:
+    1. Delimitação e caracterização da bacia hidrográfica.
+    2. Análise de dados de precipitação da região.
+    3. Cálculo da vazão de pico pelo método racional ou similar.
+    4. Hidrograma de cheia resultante.
+  agent: hydrology_specialist
+
+drainage_system_design_task:
+  description: |
+    Projetar o sistema de drenagem pluvial para o loteamento {lotissement_name}.
+    Dimensionar as sarjetas, bocas de lobo e galerias para a chuva de projeto,
+    garantindo o escoamento eficiente das águas superficiais.
+  expected_output: |
+    Um projeto de drenagem pluvial completo, incluindo:
+    1. Memória de cálculo hidráulico de todo o sistema.
+    2. Plantas com o traçado e dimensionamento das redes de drenagem.
+    3. Detalhes de estruturas típicas (bocas de lobo, poços de visita).
+  agent: hydraulic_engineer
+
+sanitation_plan_task:
+  description: |
+    Elaborar o plano de saneamento básico para o município de {municipality_name},
+    abordando os quatro eixos: abastecimento de água, esgotamento sanitário,
+    manejo de resíduos sólidos e drenagem de águas pluviais.
+  expected_output: |
+    Um documento de Plano Municipal de Saneamento Básico (PMSB) contendo:
+    1. Diagnóstico da situação atual de cada eixo.
+    2. Objetivos e metas de curto, médio e longo prazo.
+    3. Programas, projetos e ações necessárias para atingir as metas.
+    4. Estimativas de custo e fontes de financiamento.
+  agent: sanitation_specialist
+
+waste_management_plan_task:
+  description: |
+    Criar o Plano de Gerenciamento de Resíduos da Construção Civil (PGRCC) para a obra
+    {project_name}, com área de {construction_area} m².
+  expected_output: |
+    Um documento PGRCC em conformidade com a resolução CONAMA 307, detalhando:
+    1. Caracterização e estimativa de quantidade dos resíduos gerados.
+    2. Procedimentos para triagem, acondicionamento e transporte.
+    3. Indicação das áreas de destinação licenciadas (aterros, recicladoras).
+  agent: waste_management_specialist
+
+environmental_licensing_task:
+  description: |
+    Preparar a documentação para o processo de Licenciamento Ambiental do projeto {project_name}.
+    Com base nas características do empreendimento, elaborar o Relatório Ambiental Simplificado (RAS) 
+    ou os termos de referência para um Estudo de Impacto Ambiental (EIA/RIMA).
+  expected_output: |
+    A documentação técnica necessária para protocolar o pedido de licença ambiental, incluindo:
+    1. Relatório Ambiental (RAS ou similar) preenchido.
+    2. Plantas de localização e memoriais descritivos do projeto.
+    3. Formulários e requerimentos do órgão ambiental competente.
+  agent: environmental_engineer
+
+environmental_damage_assessment_task:
+  description: |
+    Avaliar o dano ambiental na área {affected_area} impactada pelo {event_description}.
+    Realizar a caracterização do dano, a valoração econômica do impacto e propor
+    medidas para um Plano de Recuperação de Área Degradada (PRAD).
+  expected_output: |
+    Um laudo pericial de avaliação de dano ambiental, contendo:
+    1. Descrição e quantificação do dano à fauna, flora e solo.
+    2. Valoração econômica do dano ambiental.
+    3. Diretrizes e ações recomendadas para o PRAD.
+  agent: environmental_damage_evaluator
+
+# --- Tarefas de Infraestrutura Viária ---
+
+highway_geometric_design_task:
+  description: |
+    Desenvolver o projeto geométrico para a implantação de um novo trecho de {length_km} km
+    da rodovia {highway_name}, entre as cidades {city_a} e {city_b}.
+  expected_output: |
+    Um projeto geométrico rodoviário completo, com:
+    1. Plantas de traçado em planta, perfil longitudinal e seções transversais tipo.
+    2. Relatório de visibilidade, superelevação e superlargura.
+    3. Memória de cálculo de volumes de corte e aterro (terraplenagem).
+  agent: highway_engineer
+
+pavement_design_task:
+  description: |
+    Projetar a estrutura do pavimento para a rodovia {highway_name}, trecho {stretch_details}, 
+    considerando o tráfego N previsto e os resultados do ensaio CBR do subleito.
+  expected_output: |
+    Um memorial de cálculo e projeto de pavimentação contendo:
+    1. Memória de cálculo do dimensionamento do pavimento pelo método do DNER/MeDiNa.
+    2. Definição e dimensionamento de todas as camadas (sub-base, base, revestimento).
+    3. Especificações técnicas para os materiais e execução de cada camada.
+  agent: pavement_design_engineer
+
+traffic_impact_study_task:
+  description: |
+    Elaborar um Estudo de Impacto de Vizinhança (EIV) focado no componente de tráfego
+    para o novo empreendimento comercial {enterprise_name} em {location}.
+  expected_output: |
+    Um relatório de impacto de tráfego, contendo:
+    1. Análise do tráfego atual na área de influência.
+    2. Estimativa do tráfego a ser gerado pelo novo empreendimento.
+    3. Análise de capacidade das vias e interseções no cenário futuro.
+    4. Proposta de medidas mitigadoras (semaforização, alterações geométricas, etc.).
+  agent: traffic_engineer
+
+# --- Tarefas de Orçamento, Licitação e Financiamento ---
+
+cost_estimation_task:
+  description: |
+    Elaborar o orçamento detalhado para o projeto de construção {project_name},
+    com base nas planilhas de referência {budget_source} e nos quantitativos extraídos do projeto.
+  expected_output: |
+    Uma planilha orçamentária completa, incluindo:
+    1. Planilha sintética com resumo de custos por etapa.
+    2. Planilha analítica com a composição de custo de cada serviço.
+    3. Curva ABC de serviços e insumos.
+    4. Cronograma físico-financeiro da obra.
+  agent: cost_engineer
+
+bidding_analysis_task:
+  description: |
+    Analisar completamente o Edital de Licitação {bidding_number} para o projeto {project_name}.
+    Identificar todos os requisitos de qualificação técnica, documentos necessários, 
+    prazos e critérios de julgamento.
+  expected_output: |
+    Um relatório de análise de edital contendo:
+    1. Checklist de todos os documentos de habilitação necessários.
+    2. Resumo dos requisitos técnicos mínimos (atestados, equipe técnica, etc.).
+    3. Análise de potenciais riscos ou cláusulas restritivas no edital.
+    4. Rascunho da proposta técnica a ser preenchida.
+  agent: bidding_analyst
+
+budget_audit_task:
+  description: |
+    Auditar a planilha orçamentária para a obra pública {project_name}, com base no 
+    orçamento de referência {budget_source} (ex: SINAPI, SICRO).
+    Verificar a correta aplicação das composições de custo, a adequação do BDI e a 
+    conformidade com os principais acórdãos do TCU sobre obras públicas.
+  expected_output: |
+    Um relatório de auditoria de orçamento, apontando:
+    1. Itens com preços unitários acima da referência, com justificativa.
+    2. Análise crítica do BDI aplicado em face da jurisprudência do TCU.
+    3. Verificação da conformidade das composições de custo utilizadas.
+    4. Parecer final sobre a conformidade do orçamento.
+  agent: budget_compliance_auditor
+
+funding_opportunity_mapping_task:
+  description: |
+    Mapear oportunidades de captação de recursos federais e estaduais para o projeto de {project_type}
+    da prefeitura de {municipality_name}. Pesquisar programas abertos, exigências e prazos.
+  expected_output: |
+    Um relatório de oportunidades de financiamento, listando:
+    1. Nome do programa de fomento/financiamento.
+    2. Órgão concedente (Ministério, Secretaria Estadual).
+    3. Resumo dos objetivos e requisitos do programa.
+    4. Prazos para submissão de propostas.
+  agent: public_funding_specialist
+
+transferegov_proposal_submission_task:
+  description: |
+    Submeter a proposta para o projeto {project_name} na plataforma Transferegov.br.
+    Utilizar as ferramentas de automação web para preencher os formulários, anexar a
+    documentação necessária e acompanhar o status da proposta.
+  expected_output: |
+    Um relatório de submissão com o comprovante de envio da proposta na plataforma
+    e um resumo dos próximos passos e prazos a serem monitorados.
+  agent: transferegov_operator
+  
+# --- Tarefas de Projetos Prediais Complementares e Inovação ---
+
+bim_coordination_task:
+  description: |
+    Coordenar os modelos BIM das disciplinas de arquitetura, estrutura e instalações
+    para o projeto {project_name}. Realizar a detecção de interferências (clash detection)
+    e gerar um relatório de compatibilização.
+  expected_output: |
+    Um relatório de compatibilização BIM, contendo:
+    1. Lista de todas as interferências detectadas, com imagens e localização.
+    2. Classificação das interferências por gravidade.
+    3. Sugestões de solução para as incompatibilidades.
+  agent: bim_specialist
+
+electrical_design_task:
+  description: |
+    Elaborar o projeto elétrico completo para um edifício comercial de {floor_area} m².
+    Incluir o dimensionamento da entrada de energia, quadros de distribuição, circuitos
+    de iluminação e tomadas, e o projeto luminotécnico.
+  expected_output: |
+    Um projeto elétrico em formato PDF e DWG, contendo:
+    1. Memorial de cálculo elétrico e luminotécnico.
+    2. Diagramas unifilares e multifilares.
+    3. Plantas de pontos, eletrodutos e fiação.
+    4. Lista de materiais e especificações técnicas.
+  agent: electrical_design_engineer
+
+spda_design_task:
+  description: |
+    Realizar a análise de risco e o projeto do Sistema de Proteção contra Descargas
+    Atmosféricas (SPDA) para a edificação {building_type} em {location}, conforme a NBR 5419.
+  expected_output: |
+    Um projeto de SPDA completo, incluindo:
+    1. Relatório de análise de gerenciamento de risco.
+    2. Plantas com o detalhamento dos subsistemas de captação, descida e aterramento.
+    3. Especificação das medidas de proteção contra surtos (DPS).
+  agent: spda_specialist
+
+hvac_design_task:
+  description: |
+    Projetar o sistema de climatização (AVAC) para o escritório de {office_area} m²,
+    garantindo os padrões de conforto térmico e qualidade do ar da NBR 16401.
+  expected_output: |
+    Um projeto de climatização, contendo:
+    1. Cálculo de carga térmica detalhado.
+    2. Seleção e especificação dos equipamentos (ex: VRF, Chiller).
+    3. Plantas com o layout da rede de dutos e difusores.
+  agent: hvac_specialist
+
+construction_tech_scouting_task:
+  description: |
+    Realizar um levantamento de tecnologias inovadoras (construtechs) aplicáveis
+    à otimização do processo de {process_name} na construção civil.
+    Analisar startups, novas metodologias e ferramentas digitais.
+  expected_output: |
+    Um relatório de inovação tecnológica, apresentando:
+    1. Mapeamento de 3 a 5 tecnologias promissoras.
+    2. Análise de caso de uso e potencial de impacto de cada tecnologia.
+    3. Avaliação de fornecedores e custos de implementação.
+  agent: innovation_expert
+  
+fire_safety_plan_task:
+  description: |
+    Elaborar o Plano de Prevenção e Proteção Contra Incêndio (PPCI) para a edificação 
+    comercial com {floor_area} m² localizada em {address}.
+    O projeto deve incluir saídas de emergência, sinalização, extintores, hidrantes e alarme, 
+    em conformidade com a instrução técnica do Corpo de Bombeiros local.
+  expected_output: |
+    Um conjunto de documentos para aprovação no Corpo de Bombeiros, incluindo:
+    1. Plantas baixas com a localização de todos os equipamentos de segurança.
+    2. Memorial descritivo do projeto e dos sistemas.
+    3. Memória de cálculo do sistema de hidrantes, se aplicável.
+    4. Anotação de Responsabilidade Técnica (ART).
+  agent: fire_safety_engineer
+
+solar_energy_project_task:
+  description: |
+    Dimensionar um sistema de energia solar fotovoltaico on-grid para uma residência 
+    com consumo médio mensal de {kwh_consumption} kWh, localizada em {city}.
+    Analisar a irradiação solar local e propor a melhor configuração de painéis e inversor.
+  expected_output: |
+    Uma proposta técnica e comercial para o sistema fotovoltaico, incluindo:
+    1. Cálculo da demanda de energia e do tamanho do sistema.
+    2. Especificação e quantidade de painéis solares e do inversor.
+    3. Análise de sombreamento e layout dos painéis no telhado.
+    4. Estimativa de geração de energia anual.
+    5. Análise de viabilidade financeira e tempo de retorno do investimento.
+  agent: solar_energy_engineer
+
+# --- Tarefas de Desenvolvimento de Ferramentas ---
+
+tool_development_task:
+  description: |
+    Desenvolver uma nova ferramenta Python para o CrewAI chamada '{tool_name}'.
+    A ferramenta deve resolver o seguinte problema: {tool_problem_description}.
+    O código deve ser limpo, comentado, escalável e incluir docstrings.
+  expected_output: |
+    Um arquivo .py contendo a classe da nova ferramenta, pronta para ser importada, 
+    seguindo os padrões de desenvolvimento do CrewAI.
+  agent: python_developer_senior
+
+tool_testing_task:
+  description: |
+    Criar e executar um plano de testes para a ferramenta '{tool_name}' desenvolvida.
+    Incluir testes unitários para validar a lógica interna e testes de integração 
+    para garantir que a ferramenta funcione corretamente dentro de um agente CrewAI.
+  expected_output: |
+    Um relatório de testes contendo:
+    1. O script de teste (ex: usando pytest).
+    2. Resultados da execução dos testes, com documentação de quaisquer bugs ou falhas encontrados.
+    3. Sugestões de melhoria na robustez da ferramenta.
+  agent: testing_engineer_qa
+  evaluation_criteria:
+    - Clarity and completeness of test coverage
+    - Effectiveness of test cases in identifying bugs
+    - Overall quality and reliability of the tool post-testing
+
+# --- Tarefa de Avaliação Obrigatória ---
 
 crew_evaluation_task:
-  description: "Avaliar criticamente a performance da crew executada sobre {topic}, analisando a qualidade dos outputs de cada agente, eficácia das ferramentas utilizadas, fluxo de trabalho e colaboração entre agentes. Identificar pontos fortes, fracos e gerar recomendações específicas para melhorar agentes, ferramentas e tarefas."
+  description: |
+    Avaliar criticamente a performance da crew executada sobre {topic}, analisando a qualidade 
+    dos outputs de cada agente, eficácia das ferramentas utilizadas, fluxo de trabalho e 
+    colaboração entre agentes. Identificar pontos fortes, fracos e gerar recomendações 
+    específicas para melhorar agentes, ferramentas e tarefas.
   expected_output: |
     Relatório completo de avaliação contendo:
-    1. RESUMO EXECUTIVO da execução
-    2. ANÁLISE INDIVIDUAL de cada agente (performance, qualidade do output, uso de ferramentas)
-    3. ANÁLISE DO FLUXO DE TRABALHO (eficiência, gargalos, colaboração)
-    4. MÉTRICAS DE QUALIDADE (quantitativas e qualitativas)
-    5. PONTOS FORTES identificados
-    6. PONTOS FRACOS e problemas detectados
+    1. RESUMO EXECUTIVO da execução.
+    2. ANÁLISE INDIVIDUAL de cada agente (performance, qualidade do output, uso de ferramentas).
+    3. ANÁLISE DO FLUXO DE TRABALHO (eficiência, gargalos, colaboração).
+    4. MÉTRICAS DE QUALIDADE (quantitativas e qualitativas).
+    5. PONTOS FORTES identificados.
+    6. PONTOS FRACOS e problemas detectados.
     7. RECOMENDAÇÕES ESPECÍFICAS para:
        - Melhorias nos agentes (configuração, backstory, tools)
        - Otimização de ferramentas (substituições, adições)
        - Refinamento de tarefas (descrições, outputs esperados)
-    8. PRIORIZAÇÃO das melhorias sugeridas
-    9. CONCLUSÕES e próximos passos
-  agent: "crewai_evaluator"
-  context: ["Avaliação final obrigatória da execução da crew"]
-
-simple_evaluation_task:
-  description: "Realizar avaliação básica da crew executada sobre {topic}"
-  expected_output: "Relatório simples de avaliação com principais observações e sugestões básicas"
-  agent: "simple_evaluator"
-  context: ["Avaliação básica para casos de fallback"] 
+    8. PRIORIZAÇÃO das melhorias sugeridas.
+    9. CONCLUSÕES e próximos passos.
+  agent: crewai_evaluator
+  evaluation_criteria:
+    - Clarity and completeness of agent outputs
+    - Effective use of tools and resources
+    - Collaboration and communication between agents
+    - Adherence to task descriptions and expected outputs
+    - Overall quality and relevance of the final deliverable

@@ -1,21 +1,24 @@
-# Core dependencies
-crewai==0.28.8
+crewai[tools]==0.130.0
+embedchain==0.1.128
+
 streamlit==1.46.0
-python-dotenv==1.0.0
+python-dotenv==1.1.0
+setuptools>=65.0.0,<81.0.0
+
+thefuzz==0.22.1
 
 # AI/ML dependencies
-openai
-langchain>=0.1.10,<0.2.0
-langchain-openai>=0.0.2
+openai==1.90.0
+langchain==0.3.26
+langchain-openai==0.2.14
 
-# Development dependencies
-pytest==7.4.3
-black==23.11.0
-flake8==6.1.0
-pre-commit==3.5.0
+# Dev
+pytest==8.4.1
+black==25.1.0
+flake8==7.3.0
+pre-commit==4.2.0
 
-# Additional utilities
-pandas==2.1.4
-numpy==1.26.2
-requests==2.31.0
-setuptools>=65.0.0 
+# Utilitários
+pandas==2.3.0
+numpy==2.3.1
+requests==2.32.4

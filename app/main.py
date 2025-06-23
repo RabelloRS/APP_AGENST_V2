@@ -21,6 +21,43 @@ from app.pages.tools import show_tools_tab
 from app.pages.crews import show_crews_tab
 from app.pages.whatsapp import show_whatsapp_tab
 from app.pages.execution import show_execution_tab
+from app.pages.help import main as show_help_tab
+
+def show_help_tools_explorer():
+    import streamlit as st
+    from app.pages.help import read_html_file
+    st.title("Explorador de Ferramentas CrewAI")
+    st.components.v1.html(read_html_file("crewai_tools_explorer.html"), height=900, scrolling=True)
+
+def show_help_agent_task():
+    import streamlit as st
+    from app.pages.help import read_html_file
+    st.title("CrewAI: Orquestração de Agentes de IA")
+    st.components.v1.html(read_html_file("crewai_agent_task.html"), height=900, scrolling=True)
+
+def show_help_tools_v2():
+    import streamlit as st
+    from app.pages.help import read_html_file
+    st.title("CrewAI Tools v2 (Novidades)")
+    st.components.v1.html(read_html_file("crewai_tools_v2.html"), height=900, scrolling=True)
+
+def show_help_v3():
+    import streamlit as st
+    from app.pages.help import read_html_file
+    st.title("CrewAI v3 (Visão Geral)")
+    st.components.v1.html(read_html_file("crewai_v3.html"), height=900, scrolling=True)
+
+def show_help_structures_summary():
+    import streamlit as st
+    from app.pages.help import read_html_file
+    st.title("Resumo Estrutural Rápido")
+    st.components.v1.html(read_html_file("crewai_structures_summary.html"), height=900, scrolling=True)
+
+def show_help_tabela_tools():
+    import streamlit as st
+    from app.pages.help import read_html_file
+    st.title("Tabela Interativa de Ferramentas CrewAI")
+    st.components.v1.html(read_html_file("tabela_tools.html"), height=900, scrolling=True)
 
 # Carregar variáveis de ambiente
 env_path = Path(__file__).resolve().parent.parent / ".env"
@@ -135,6 +172,15 @@ def main():
         ],
         "📊 Execução": [
             st.Page(show_execution_tab, title="Execução", icon="📊"),
+        ],
+        "❓ Ajuda": [
+            st.Page(show_help_tools_explorer, title="Explorador de Ferramentas", icon="🛠️"),
+            st.Page(show_help_agent_task, title="Orquestração de Agentes", icon="🧑‍💻"),
+            st.Page(show_help_tools_v2, title="Tools v2 (Novidades)", icon="✨"),
+            st.Page(show_help_v3, title="CrewAI v3 (Visão Geral)", icon="📚"),
+            st.Page(show_help_structures_summary, title="Resumo Estrutural", icon="📋"),
+            st.Page(show_help_tabela_tools, title="Tabela Interativa de Ferramentas", icon="📑"),
+            st.Page(show_help_tab, title="Ajuda (Todos)", icon="❓"),
         ]
     }
 

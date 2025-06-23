@@ -9,14 +9,14 @@ from typing import Type, Callable
 
 import yaml
 from crewai import Agent
-from crewai.tools import BaseTool
+from crewai.tools import BaseTool  # Corrigido: importa BaseTool do CrewAI
 
 
 class GenericArgsSchema(BaseModel):
     argumento: str = Field(..., description="Argumento genérico para a ferramenta.")
 
 
-class CustomTool(BaseTool):
+class CustomTool(BaseTool):  # Corrigido: herda da BaseTool do CrewAI
     """Classe personalizada para tools compatível com CrewAI (padrão CrewAI)"""
     name: str = "Custom Tool"
     description: str = "Tool customizada compatível com CrewAI"
@@ -152,42 +152,46 @@ class AgentManager:
             print(f"Erro ao criar arquivo de configuração de tools dos agentes: {e}")
 
     def _create_tool_objects(self, tool_names: List[str]) -> List[BaseTool]:
-        """Cria objetos CustomTool compatíveis com CrewAI"""
+        """Cria objetos Tool compatíveis com CrewAI (prioriza nativas, fallback para customizadas)"""
         print(f"🔧 Debug: Tentando criar {len(tool_names)} tool objects")
         
         if not self.tools_manager:
             print("❌ ToolsManager não configurado")
             return []
 
+        import re
+        def camel_to_snake(name):
+            s1 = re.sub(r'(.)([A-Z][a-z]+)', r'\1_\2', name)
+            return re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
         tools = []
         for tool_name in tool_names:
             print(f"🔧 Criando tool '{tool_name}'...")
-            
-            # Obter função da tool
-            tool_function = self.tools_manager.get_tool_function(tool_name)
-            if not tool_function:
-                print(f"❌ Função da tool '{tool_name}' não encontrada")
-                continue
-
-            # Obter informações da tool
-            tool_info = self.tools_manager.get_tool_info(tool_name)
-            if not tool_info:
-                print(f"❌ Informações da tool '{tool_name}' não encontradas")
-                continue
-
-            print(f"✅ Função e info da tool '{tool_name}' encontradas")
-            
-            # Criar objeto CustomTool
-            custom_tool = CustomTool(
-                name=tool_name,
-                description=tool_info.get("description", f"Tool {tool_name}"),
-                func=tool_function
-            )
-            # Debug: garantir que _type está presente
-            print(f"[DEBUG] Tool '{tool_name}' type: {type(custom_tool)} | _type: {getattr(custom_tool, '_type', None)} | dir: {dir(custom_tool)}")
-            tools.append(custom_tool)
-            print(f"✅ Tool '{tool_name}' criada com sucesso")
-
+            tool_instance = None
+            # 1. Tenta importar ferramenta nativa do crewai_tools pelo nome
+            try:
+                import importlib
+                module_name = f"crewai_tools.tools.{camel_to_snake(tool_name)}"
+                tool_module = importlib.import_module(module_name)
+                tool_class = getattr(tool_module, tool_name)
+                tool_instance = tool_class()
+                print(f"✅ Tool nativa '{tool_name}' importada do crewai_tools")
+            except Exception as e:
+                print(f"⚠️ Tool '{tool_name}' não encontrada no crewai_tools ({e}), tentando customizada...")
+                # 2. Fallback: ferramenta customizada
+                tool_function = self.tools_manager.get_tool_function(tool_name)
+                tool_info = self.tools_manager.get_tool_info(tool_name)
+                if tool_function and tool_info:
+                    tool_instance = CustomTool(
+                        name=tool_name,
+                        description=tool_info.get("description", f"Tool {tool_name}"),
+                        func=tool_function
+                    )
+                    print(f"✅ Tool customizada '{tool_name}' criada")
+                else:
+                    print(f"❌ Tool '{tool_name}' não encontrada nem como nativa nem como customizada")
+                    continue
+            tools.append(tool_instance)
         print(f"✅ Total de {len(tools)} tools criadas com sucesso")
         return tools
 

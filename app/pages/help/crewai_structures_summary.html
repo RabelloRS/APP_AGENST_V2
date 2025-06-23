@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resumo Estrutural: Agentes, Tarefas, Crew e Tools</title>
+  <style>
+    body {
+      background: #101624;
+      color: #e0e0e0;
+      font-family: 'Open Sans', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 32px 24px;
+      background: rgba(20, 30, 60, 0.98);
+      border-radius: 18px;
+      box-shadow: 0 6px 32px rgba(0,0,0,0.25);
+      border: 2px solid #00aaff;
+    }
+    h1, h2 {
+      color: #00aaff;
+      margin-top: 0;
+    }
+    h2 {
+      margin-bottom: 10px;
+      font-size: 1.5rem;
+      border-bottom: 1.5px solid #00aaff;
+      padding-bottom: 4px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 32px;
+      background: rgba(10, 20, 40, 0.98);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px 16px;
+      border: 1px solid #223355;
+      text-align: left;
+      font-size: 1rem;
+    }
+    th {
+      background: #0a223a;
+      color: #fff;
+      font-weight: 600;
+    }
+    tr:nth-child(even) td {
+      background: #151e2e;
+    }
+    .desc {
+      color: #a5d6ff;
+      font-size: 0.98rem;
+    }
+    @media (max-width: 700px) {
+      .container { padding: 10px 2px; }
+      th, td { font-size: 0.92rem; padding: 7px 6px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Resumo Estrutural Rápido</h1>
+    <h2>Agente</h2>
+    <table>
+      <thead>
+        <tr><th>Campo</th><th>Descrição</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>role</b></td><td class="desc">Papel do agente (ex: "Analista de Dados")</td></tr>
+        <tr><td><b>goal</b></td><td class="desc">Objetivo principal do agente</td></tr>
+        <tr><td><b>backstory</b></td><td class="desc">Contexto/histórico para orientar o comportamento</td></tr>
+        <tr><td><b>tools</b></td><td class="desc">Lista de ferramentas disponíveis para o agente</td></tr>
+      </tbody>
+    </table>
+    <h2>Tarefa</h2>
+    <table>
+      <thead>
+        <tr><th>Campo</th><th>Descrição</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>description</b></td><td class="desc">Descrição resumida da tarefa</td></tr>
+        <tr><td><b>agent</b></td><td class="desc">Agente responsável pela tarefa</td></tr>
+        <tr><td><b>expected_output</b></td><td class="desc">Resultado esperado da tarefa</td></tr>
+        <tr><td><b>context</b></td><td class="desc">Contexto adicional ou instruções específicas para a tarefa</td></tr>
+        <tr><td><b>tools</b> <span style="color:#a5d6ff;font-size:0.95em;">(opcional)</span></td><td class="desc">Lista de ferramentas específicas para a tarefa</td></tr>
+        <tr><td><b>parameters</b> <span style="color:#a5d6ff;font-size:0.95em;">(opcional)</span></td><td class="desc">Parâmetros ou inputs específicos para execução</td></tr>
+        <tr><td><b>output_format</b> <span style="color:#a5d6ff;font-size:0.95em;">(opcional)</span></td><td class="desc">Formato esperado do resultado</td></tr>
+        <tr><td><b>dependencies</b> <span style="color:#a5d6ff;font-size:0.95em;">(opcional)</span></td><td class="desc">Tarefas que devem ser concluídas antes</td></tr>
+        <tr><td><b>deadline</b> <span style="color:#a5d6ff;font-size:0.95em;">(opcional)</span></td><td class="desc">Prazo para execução</td></tr>
+        <tr><td><b>status</b> <span style="color:#a5d6ff;font-size:0.95em;">(opcional)</span></td><td class="desc">Status de andamento da tarefa</td></tr>
+      </tbody>
+    </table>
+    <h2>Crew</h2>
+    <table>
+      <thead>
+        <tr><th>Campo</th><th>Descrição</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>agents</b></td><td class="desc">Lista de agentes que compõem a crew</td></tr>
+        <tr><td><b>tasks</b></td><td class="desc">Lista de tarefas atribuídas à crew</td></tr>
+        <tr><td><b>kickoff</b></td><td class="desc">Método para iniciar a execução da crew</td></tr>
+      </tbody>
+    </table>
+    <h2>Tool</h2>
+    <table>
+      <thead>
+        <tr><th>Campo</th><th>Descrição</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>name</b></td><td class="desc">Nome da ferramenta</td></tr>
+        <tr><td><b>description</b></td><td class="desc">Descrição resumida da funcionalidade</td></tr>
+        <tr><td><b>args_schema</b></td><td class="desc">Esquema de argumentos esperados (Pydantic)</td></tr>
+        <tr><td><b>_run</b></td><td class="desc">Método principal de execução da ferramenta</td></tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

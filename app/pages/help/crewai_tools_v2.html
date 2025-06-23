@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorador de Ferramentas CrewAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0f1f;
+            --primary-blue: #00aaff;
+            --light-cyan: #7fffd4;
+            --card-bg: rgba(16, 24, 48, 0.7);
+            --text-light: #e0e6f0;
+            --text-muted: #8a94a2;
+            --border-glow: rgba(0, 170, 255, 0.25);
+            --shadow-color: rgba(0, 170, 255, 0.15);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            background-image:
+                url('https://www.transparenttextures.com/patterns/cubes.png'),
+                linear-gradient(145deg, var(--bg-dark), #111827);
+            background-size: auto, cover;
+            color: var(--text-light);
+        }
+
+        .sidebar {
+            background-color: rgba(16, 24, 48, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border-glow);
+        }
+
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            border-left: 3px solid transparent;
+            color: var(--text-muted);
+        }
+
+        .nav-link.active, .nav-link:hover {
+            background-color: var(--border-glow);
+            color: var(--text-light);
+            border-left-color: var(--primary-blue);
+            transform: translateX(4px);
+        }
+
+        .content-section {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-15px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .tool-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 0.75rem;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            animation: slideIn 0.5s ease-out forwards;
+            opacity: 0; /* Começa invisível para a animação */
+        }
+
+        .tool-card:hover {
+            box-shadow: 0 4px 25px var(--shadow-color);
+            transform: translateY(-4px);
+        }
+        
+        .tool-title {
+            color: var(--primary-blue);
+        }
+        
+        .tool-description {
+            padding: 0 1rem 1rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .tool-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s ease-in-out;
+        }
+
+        .tool-details.open {
+            max-height: 1500px;
+        }
+        
+        .code-block {
+            background-color: #011627;
+            color: #d6deeb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            position: relative;
+            border: 1px solid var(--border-glow);
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #1a2b4b;
+            color: var(--light-cyan);
+            border: 1px solid var(--light-cyan);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--light-cyan);
+            color: var(--bg-dark);
+        }
+        
+        .chart-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 1.5rem auto;
+            height: 400px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid;
+        }
+        .tag-api { background-color: rgba(255, 179, 0, 0.1); color: #ffb300; border-color: #ffb300; }
+        .tag-dependency { background-color: rgba(0, 255, 255, 0.1); color: #00ffff; border-color: #00ffff; }
+        .tag-variable { background-color: rgba(255, 107, 107, 0.1); color: #ff6b6b; border-color: #ff6b6b; }
+
+        /* Syntax Highlighting */
+        .code-block .hl-keyword { color: #c792ea; font-weight: bold; }
+        .code-block .hl-string { color: #c3e88d; }
+        .code-block .hl-comment { color: #637777; font-style: italic; }
+        .code-block .hl-function { color: #82aaff; }
+        .code-block .hl-class { color: #ffcb8b; }
+        .code-block .hl-number { color: #f78c6c; }
+    </style>
+</head>
+<body class="antialiased">
+
+<div class="relative min-h-screen md:flex">
+    <div class="md:hidden flex justify-between items-center p-4 bg-gray-900/50 backdrop-blur-sm border-b border-[var(--border-glow)] sticky top-0 z-30">
+        <h1 class="text-xl font-bold text-white">Explorador CrewAI</h1>
+        <button id="mobile-menu-button" class="text-white focus:outline-none">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+    </div>
+
+    <aside id="sidebar" class="sidebar w-64 p-6 space-y-2 fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-300 ease-in-out z-40">
+        <h1 class="text-2xl font-bold text-white mb-6" style="font-family: 'Roboto', sans-serif;">Explorador CrewAI</h1>
+        <nav id="navigation">
+            <a href="#introduction" class="nav-link block py-2.5 px-4 rounded font-medium">Introdução</a>
+            <a href="#arquivo" class="nav-link block py-2.5 px-4 rounded font-medium">Arquivo e Documento</a>
+            <a href="#scraping" class="nav-link block py-2.5 px-4 rounded font-medium">Web Scraping</a>
+            <a href="#busca" class="nav-link block py-2.5 px-4 rounded font-medium">Busca e Pesquisa</a>
+            <a href="#dados" class="nav-link block py-2.5 px-4 rounded font-medium">Banco de Dados</a>
+            <a href="#ia" class="nav-link block py-2.5 px-4 rounded font-medium">IA e ML</a>
+            <a href="#nuvem" class="nav-link block py-2.5 px-4 rounded font-medium">Nuvem e Armazenamento</a>
+            <a href="#automacao" class="nav-link block py-2.5 px-4 rounded font-medium">Automação</a>
+            <a href="#custom" class="nav-link block py-2.5 px-4 rounded font-medium">Ferramentas Customizadas</a>
+            <a href="#conclusion" class="nav-link block py-2.5 px-4 rounded font-medium">Conclusão</a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-6 sm:p-8 lg:p-12 overflow-y-auto h-screen">
+        <div id="content-container">
+            </div>
+    </main>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- DATA STORE --- //
+    const toolsData = {
+        introduction: {
+            title: "Guia Abrangente das Ferramentas CrewAI",
+            content: `
+                <p class="mb-4 text-lg text-[var(--text-light)]">O CrewAI é um framework robusto para criar equipes de agentes de IA autônomos. As ferramentas são o pilar que capacita esses agentes a interagir com o mundo, manipular dados e executar ações.</p>
+                <p class="mb-6 text-[var(--text-muted)]">Esta aplicação interativa é seu guia para a vasta biblioteca de ferramentas pré-construídas. Navegue pelas categorias para descobrir as capacidades disponíveis para seus agentes.</p>
+                <h3 class="text-2xl font-semibold mb-4 text-center text-[var(--light-cyan)]">Distribuição de Ferramentas por Categoria</h3>
+                <div class="chart-container"><canvas id="toolsChart"></canvas></div>
+                <h3 class="text-2xl font-semibold mb-4 text-[var(--light-cyan)]">Como Utilizar Ferramentas</h3>
+                <p class="mb-4 text-[var(--text-muted)]">A integração de ferramentas segue um processo padronizado: importar, adicionar ao agente e configurar dependências. A maioria pode ser instalada com <code class="bg-gray-800 text-sm p-1 rounded text-[var(--light-cyan)]">pip install 'crewai[tools]'</code>, mas algumas exigem pacotes adicionais.</p>
+            `,
+            tools: []
+        },
+        arquivo: {
+            title: "Ferramentas de Arquivo e Documento",
+            content: `<p class="mb-6 text-[var(--text-muted)]">Permitem que agentes interajam com diversos formatos de arquivo (PDF, DOCX, JSON, CSV), realizando operações de leitura, escrita e busca.</p>`,
+            tools: [
+                 { name: 'Ferramenta de Leitura de Arquivos', importName: 'FileReadTool', description: 'Lê arquivos do sistema de arquivos local, suportando formatos como .txt, .csv, e .json, convertendo JSON automaticamente em dicionário Python.', details: [{ type: 'dependency', text: "pip install 'crewai[tools]'" }, { type: 'variable', text: '<strong>file_path</strong>: Caminho para o arquivo.'}], code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> FileReadTool\n\n<span class="hl-comment"># Inicializa a ferramenta para qualquer arquivo</span>\nfile_reader <span class="hl-keyword">=</span> <span class="hl-class">FileReadTool</span>()` },
+                 { name: 'Ferramenta de Escrita de Arquivos', importName: 'FileWriterTool', description: 'Componente para escrita de conteúdo em arquivos, compatível com múltiplos SOs. Útil para gerar relatórios, logs e arquivos de configuração.', details: [{ type: 'dependency', text: "pip install 'crewai[tools]'" }, { type: 'variable', text: '<strong>filename</strong>: Nome do arquivo.'}, { type: 'variable', text: '<strong>content</strong>: Conteúdo a ser escrito.'}], code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> FileWriterTool\n\nwriter_tool <span class="hl-keyword">=</span> <span class="hl-class">FileWriterTool</span>()` },
+                 { name: 'Ferramenta de Busca em PDF', importName: 'PDFSearchTool', description: 'Ferramenta RAG para busca semântica em documentos PDF, extraindo conteúdo relevante de grandes volumes de texto.', details: [{ type: 'dependency', text: "pip install 'crewai[tools]'" }, { type: 'variable', text: '<strong>pdf</strong> (opcional): Caminho para o arquivo PDF.'}], code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> PDFSearchTool\n\n<span class="hl-comment"># Busca em um PDF específico</span>\npdf_search <span class="hl-keyword">=</span> <span class="hl-class">PDFSearchTool</span>(pdf<span class="hl-keyword">=</span><span class="hl-string">'docs/meu_doc.pdf'</span>)` },
+                 { name: 'Ferramenta de Leitura de Diretório', importName: 'DirectoryReadTool', description: 'Utilitário para fornecer uma listagem abrangente do conteúdo de um diretório, incluindo subdiretórios de forma recursiva.', details: [{ type: 'dependency', text: "pip install 'crewai[tools]'" }, { type: 'variable', text: '<strong>directory</strong> (opcional): Caminho do diretório.'}], code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> DirectoryReadTool\n\ndirectory_reader <span class="hl-keyword">=</span> <span class="hl-class">DirectoryReadTool</span>(directory<span class="hl-keyword">=</span><span class="hl-string">'./src'</span>)` },
+            ]
+        },
+        scraping: {
+            title: "Web Scraping e Navegação",
+            content: `<p class="mb-6 text-[var(--text-muted)]">Capacite agentes a interagir com a web, extraindo dados de sites, automatizando interações com navegadores e raspando conteúdo em escala.</p>`,
+            tools: [
+                 { name: 'Raspagem de Site (ScrapeWebsiteTool)', description: 'Extrai e lê o conteúdo completo de um site especificado via requisições HTTP e análise de HTML.', details: [{ type: 'dependency', text: "pip install 'crewai[tools]'" }, { type: 'variable', text: '<strong>website_url</strong>: URL do site.'}], code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> ScrapeWebsiteTool\n\nscraper <span class="hl-keyword">=</span> <span class="hl-class">ScrapeWebsiteTool</span>(website_url<span class="hl-keyword">=</span><span class="hl-string">'https://www.example.com'</span>)` },
+                 { name: 'Raspagem com Selenium', description: 'Utiliza Selenium para extrair conteúdo, ideal para sites com JavaScript e conteúdo dinâmico.', details: [{ type: 'dependency', text: "pip install 'crewai[tools]'" }, { type: 'variable', text: '<strong>website_url</strong>: URL do site.'}], code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> SeleniumScrapingTool\n\nselenium_tool <span class="hl-keyword">=</span> <span class="hl-class">SeleniumScrapingTool</span>()` },
+                 { name: 'Raspagem com Firecrawl', description: 'Usa a plataforma Firecrawl para rastrear sites e converter seu conteúdo em markdown limpo ou dados estruturados.', details: [{ type: 'dependency', text: "pip install firecrawl-py" }, { type: 'api', text: "FIRECRAWL_API_KEY" }, { type: 'variable', text: '<strong>url</strong>: URL base para rastreio.'}], code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> FirecrawlCrawlWebsiteTool\n\nfirecrawl_tool <span class="hl-keyword">=</span> <span class="hl-class">FirecrawlCrawlWebsiteTool</span>()` },
+                 { name: 'Automação com MultiOn', description: 'Capacita agentes a navegar e interagir na web usando linguagem natural, automatizando tarefas complexas.', details: [{ type: 'dependency', text: 'pip install multion' }, { type: 'api', text: "MULTION_API_KEY" }, { type: 'variable', text: '<strong>cmd</strong>: Comando em linguagem natural.'}], code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> MultiOnTool\n\nmultion_tool <span class="hl-keyword">=</span> <span class="hl-class">MultiOnTool</span>()` },
+            ]
+        },
+        busca: {
+            title: "Busca e Pesquisa",
+            content: `<p class="mb-6 text-[var(--text-muted)]">Expanda a capacidade dos agentes para coletar informações de fontes online como Serper, Brave, GitHub e YouTube.</p>`,
+            tools: [
+                 { name: 'Busca com Serper.dev', description: 'Realiza buscas na internet utilizando a API serper.dev para retornar os resultados mais relevantes.', details: [{ type: 'dependency', text: "pip install 'crewai[tools]'" }, { type: 'api', text: "SERPER_API_KEY" }], code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> SerperDevTool\n\nsearch_tool <span class="hl-keyword">=</span> <span class="hl-class">SerperDevTool</span>()` },
+                 { name: 'Busca com Brave', description: 'Realiza buscas na internet utilizando a API de Busca Brave, com foco em privacidade.', details: [{ type: 'dependency', text: "pip install 'crewai[tools]'" }, { type: 'api', text: "BRAVE_API_KEY" }], code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> BraveSearchTool\n\nbrave_search <span class="hl-keyword">=</span> <span class="hl-class">BraveSearchTool</span>()` },
+                 { name: 'Busca no GitHub', description: 'Ferramenta RAG para buscas semânticas em repositórios GitHub (código, issues, PRs).', details: [{ type: 'dependency', text: "pip install 'crewai[tools]'" }, { type: 'api', text: "GH_TOKEN" }], code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> GithubSearchTool\n\ngithub_search <span class="hl-keyword">=</span> <span class="hl-class">GithubSearchTool</span>()` },
+                 { name: 'Busca em Vídeo do YouTube', description: 'Ferramenta RAG que realiza buscas semânticas dentro de vídeos específicos do YouTube.', details: [{ type: 'dependency', text: "pip install 'crewai[tools]'" }, { type: 'variable', text: '<strong>youtube_video_url</strong>: URL do vídeo.'}], code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> YoutubeVideoSearchTool\n\nYoutube <span class="hl-keyword">=</span> <span class="hl-class">YoutubeVideoSearchTool</span>()` },
+            ]
+        },
+        custom: {
+            title: "Criação de Ferramentas Personalizadas",
+            content: `
+                <p class="mb-6 text-[var(--text-muted)]">A CrewAI permite estender as capacidades dos agentes com ferramentas adaptadas às suas necessidades, seja subclassificando <code class="bg-gray-800 text-sm p-1 rounded">BaseTool</code> ou usando o decorador <code class="bg-gray-800 text-sm p-1 rounded">@tool</code>.</p>
+                <h3 class="text-xl font-semibold mb-3 text-[var(--light-cyan)]">Subclassificação de BaseTool</h3>
+                <p class="mb-4 text-[var(--text-muted)]">Ideal para ferramentas complexas, definindo nome, descrição, um esquema de argumentos com Pydantic e a lógica no método <code class="bg-gray-800 text-sm p-1 rounded">_run</code>.</p>
+            `,
+            tools: [{
+                name: 'Exemplo com BaseTool',
+                code: `<span class="hl-keyword">from</span> crewai.tools <span class="hl-keyword">import</span> BaseTool\n<span class="hl-keyword">from</span> pydantic <span class="hl-keyword">import</span> BaseModel, Field\n\n<span class="hl-keyword">class</span> <span class="hl-class">SentimentAnalysisTool</span>(<span class="hl-class">BaseTool</span>):\n    name: <span class="hl-class">str</span> <span class="hl-keyword">=</span> <span class="hl-string">"Análise de Sentimento"</span>\n    description: <span class="hl-class">str</span> <span class="hl-keyword">=</span> <span class="hl-string">"Analisa o sentimento de um texto."</span>\n\n    <span class="hl-keyword">def</span> <span class="hl-function">_run</span>(<span class="hl-keyword">self</span>, text: <span class="hl-class">str</span>) -> <span class="hl-class">str</span>:\n        <span class="hl-comment"># Lógica de análise aqui</span>\n        <span class="hl-keyword">return</span> <span class="hl-string">"Sentimento: Positivo"</span>`,
+                details: []
+            }]
+        },
+        custom_decorator: {
+            title: "",
+            content: `
+                <h3 class="text-xl font-semibold mb-3 mt-8 text-[var(--light-cyan)]">Utilizando o Decorador @tool</h3>
+                <p class="mb-4 text-[var(--text-muted)]">Uma alternativa concisa para funções simples. A docstring da função se torna a descrição que o agente usará para entender sua finalidade.</p>
+            `,
+             tools: [{
+                name: 'Exemplo com @tool',
+                code: `<span class="hl-keyword">from</span> crewai.tools <span class="hl-keyword">import</span> tool\n\n@<span class="hl-function">tool</span>(<span class="hl-string">"Calculadora Simples"</span>)\n<span class="hl-keyword">def</span> <span class="hl-function">calculator</span>(expression: <span class="hl-class">str</span>) -> <span class="hl-class">str</span>:\n    <span class="hl-string">"""Calcula o resultado de uma expressão matemática."""</span>\n    <span class="hl-keyword">return</span> eval(expression)`,
+                 details: []
+            }]
+        },
+        // Outras categorias podem ser preenchidas de forma similar
+        dados: { title: "Ferramentas de Banco de Dados", content: `<p class="mb-6 text-[var(--text-muted)]">Facilite a interação com sistemas de armazenamento como SQL, Snowflake e stores de vetores.</p>`, tools: [] },
+        ia: { title: "Ferramentas de IA e Machine Learning", content: `<p class="mb-6 text-[var(--text-muted)]">Interaja com serviços avançados de IA como DALL-E, Vision e execute código Python.</p>`, tools: [] },
+        nuvem: { title: "Ferramentas de Nuvem e Armazenamento", content: `<p class="mb-6 text-[var(--text-muted)]">Conecte-se a serviços de nuvem como Amazon S3 e Amazon Bedrock.</p>`, tools: [] },
+        automacao: { title: "Ferramentas de Automação", content: `<p class="mb-6 text-[var(--text-muted)]">Automatize fluxos de trabalho com Apify, Composio e MultiOn.</p>`, tools: [] },
+        conclusion: {
+            title: "Conclusão",
+            content: `
+                <p class="mb-4 text-lg text-[var(--text-light)]">O ecossistema de ferramentas da CrewAI é um componente estratégico para construir agentes de IA autônomos e capazes. A vasta biblioteca pré-construída, combinada com a flexibilidade para criar funcionalidades personalizadas, oferece uma plataforma robusta para desenvolvedores.</p>
+                <p class="text-[var(--text-muted)]">A CrewAI equipa agentes para serem "fazedores" no mundo digital, permitindo a construção de soluções de IA autônomas, inteligentes e eficientes.</p>
+            `,
+            tools: []
+        },
+    };
+
+    // --- RENDER FUNCTIONS --- //
+    const contentContainer = document.getElementById('content-container');
+    let toolCardIdCounter = 0;
+
+    function renderContent(hash) {
+        const key = hash.substring(1) || 'introduction';
+        let sectionHtml = '';
+        
+        // Fade out old content
+        contentContainer.style.opacity = '0';
+        
+        setTimeout(() => {
+            if (key === 'custom') {
+                sectionHtml = generateSectionHtml(toolsData.custom) + generateSectionHtml(toolsData.custom_decorator, false);
+            } else {
+                sectionHtml = generateSectionHtml(toolsData[key]);
+            }
+            contentContainer.innerHTML = sectionHtml;
+            
+            // Fade in new content
+            contentContainer.style.opacity = '1';
+
+            if (key === 'introduction') {
+                renderChart();
+            }
+
+            updateActiveLink(key);
+            attachEventListeners();
+            
+            // Staggered animation for tool cards
+            document.querySelectorAll('.tool-card').forEach((card, index) => {
+                card.style.animationDelay = `${index * 100}ms`;
+            });
+
+        }, 300); // Wait for fade-out transition
+    }
+
+    function generateSectionHtml(sectionData, includeTitle = true) {
+        if (!sectionData) return '';
+        let html = `<div class="content-section">`;
+        if (includeTitle) {
+           html += `<h2 class="text-3xl sm:text-4xl font-bold mb-2 text-white" style="font-family: 'Roboto', sans-serif;">${sectionData.title}</h2>`;
+        }
+        html += sectionData.content;
+        html += generateToolsHtml(sectionData.tools);
+        html += `</div>`;
+        return html;
+    }
+
+    function generateToolsHtml(tools) {
+        if (!tools || tools.length === 0) return '';
+        let html = '<div class="space-y-6 mt-8">';
+        tools.forEach(tool => {
+            toolCardIdCounter++;
+            const detailsId = `tool-details-${toolCardIdCounter}`;
+            const codeBlockId = `code-block-${toolCardIdCounter}`;
+            html += `
+                <div class="tool-card">
+                    <button class="w-full text-left p-4 focus:outline-none" data-details-id="${detailsId}">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-lg font-semibold tool-title">${tool.name}</h4>
+                            <svg class="w-5 h-5 transform transition-transform text-[var(--primary-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </button>
+                    ${tool.description ? `<div class="tool-description"><p>${tool.description}</p></div>` : ''}
+                    <div id="${detailsId}" class="tool-details">
+                        <div class="p-4 border-t border-[var(--border-glow)]">
+                            ${tool.details.length > 0 ? `<div class="mb-4 flex flex-wrap gap-2">${tool.details.map(detail => `<span class="tag ${'tag-' + detail.type}">${detail.text}</span>`).join('')}</div>` : ''}
+                            <div class="code-block">
+                                <button class="copy-btn" data-clipboard-target="#${codeBlockId}">Copiar</button>
+                                <pre><code id="${codeBlockId}">${tool.code}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        return html;
+    }
+
+    function renderChart() {
+        const ctx = document.getElementById('toolsChart')?.getContext('2d');
+        if (!ctx) return;
+        
+        const chartData = {
+            labels: ['Arquivo', 'Scraping', 'Busca', 'DB', 'IA/ML', 'Nuvem', 'Automação'],
+            datasets: [{
+                label: 'Nº de Ferramentas',
+                data: [4, 4, 4, 0, 0, 0, 0], // Simplified data
+                backgroundColor: ['#00aaff', '#7fffd4', '#c792ea', '#ffcb8b', '#f78c6c', '#82aaff', '#c3e88d'],
+                borderColor: 'var(--bg-dark)',
+                borderWidth: 4,
+                hoverOffset: 8
+            }]
+        };
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: 'var(--text-muted)', font: { family: 'Inter', size: 14 } }
+                    },
+                    tooltip: {
+                        backgroundColor: '#011627',
+                        titleColor: 'var(--light-cyan)',
+                        bodyColor: 'var(--text-light)',
+                        padding: 12,
+                        cornerRadius: 8
+                    }
+                }
+            }
+        });
+    }
+
+    // --- EVENT LISTENERS & INITIALIZATION --- //
+    function attachEventListeners() {
+        document.querySelectorAll('.tool-card button[data-details-id]').forEach(button => {
+            button.addEventListener('click', () => {
+                const details = document.getElementById(button.dataset.detailsId);
+                const icon = button.querySelector('svg');
+                details.classList.toggle('open');
+                icon.classList.toggle('rotate-180');
+            });
+        });
+
+        document.querySelectorAll('.copy-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const target = document.querySelector(button.dataset.clipboardTarget);
+                if (target) {
+                    navigator.clipboard.writeText(target.innerText).then(() => {
+                        button.textContent = 'Copiado!';
+                        setTimeout(() => { button.textContent = 'Copiar'; }, 2000);
+                    });
+                }
+            });
+        });
+    }
+
+    function updateActiveLink(key) {
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === `#${key}`);
+        });
+    }
+
+    // Navigation handler
+    document.getElementById('navigation').addEventListener('click', (e) => {
+        if (e.target.tagName === 'A') {
+            e.preventDefault();
+            const hash = new URL(e.target.href).hash;
+            if (window.location.hash !== hash) {
+                window.location.hash = hash;
+            }
+            if (window.innerWidth < 768) { // md breakpoint
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            }
+        }
+    });
+
+    window.addEventListener('hashchange', () => renderContent(window.location.hash));
+    
+    // Initial Render
+    renderContent(window.location.hash || '#introduction');
+
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-button').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+    });
+});
+</script>
+
+</body>
+</html>

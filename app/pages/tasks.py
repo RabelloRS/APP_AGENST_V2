@@ -3,9 +3,22 @@ Gerenciamento de Tarefas - Configuração e Visualização de Tarefas
 """
 
 import streamlit as st
-from pathlib import Path
+import os
+from datetime import date
 
-# Dicionário de nomes amigáveis para tarefas
+# Ícones personalizados por tipo de tarefa
+TASK_ICONS = {
+    "research_task": "🔍",
+    "analysis_task": "📊",
+    "writing_task": "📝",
+    "review_task": "✅",
+    "coordination_task": "🧑‍💼",
+    "excel_analysis_task": "📈",
+    "whatsapp_monitoring_task": "📱",
+    "file_download_task": "⬇️",
+    "file_organization_task": "🗂️"
+}
+
 NOMES_TAREFAS = {
     "research_task": "Pesquisa",
     "analysis_task": "Análise de Dados",
@@ -18,139 +31,148 @@ NOMES_TAREFAS = {
     "file_organization_task": "Organização de Arquivos"
 }
 
-def get_task_category_icon(task_type):
-    """Retorna um ícone com base no tipo da tarefa."""
-    if "research" in task_type:
-        return "🔍"
-    elif "writing" in task_type:
-        return "✍️"
-    elif "review" in task_type:
-        return "✅"
-    elif "excel" in task_type:
-        return "📈"
-    elif "whatsapp" in task_type or "file" in task_type:
-        return "📂"
-    return "📊"
-
 def show_tasks_tab():
-    """Exibe a aba de gerenciamento de tarefas."""
-    st.header("📋 Gerenciamento de Tarefas")
-    st.markdown("### Visualize e configure as tarefas disponíveis no sistema")
-    
-    # Ajuda geral
-    with st.expander("ℹ️ Sobre Tarefas", expanded=False):
-        st.info("""
-        **O que são tarefas?**
-        Tarefas são ações específicas que os agentes podem executar para alcançar objetivos.
-
-        **Como funcionam:**
-        1. Cada tarefa tem um agente responsável.
-        2. Tarefas podem ser combinadas em crews (equipes).
-        3. As tarefas são executadas sequencialmente.
-        4. O resultado de uma tarefa pode alimentar a próxima.
-        """)
-
-    st.markdown("---")
+    st.set_page_config(page_title="Gerenciar Tarefas", layout="wide")
+    st.title("Gerenciamento de Tarefas Especializadas")
+    st.info("Gerencie as tarefas: edite, exclua ou crie novas tarefas para sua equipe.")
 
     task_manager = st.session_state.task_manager
     agent_manager = st.session_state.agent_manager
-    
-    # Estatísticas
-    st.subheader("📊 Visão Geral")
-    try:
-        available_tasks = task_manager.list_available_task_types()
-        tasks_with_agents = sum(1 for task_type in available_tasks 
-                               if (task_manager.get_task_info(task_type) or {}).get("agent"))
-        
+    tools_manager = st.session_state.tools_manager
+
+    # Estado de edição/criação/exclusão
+    if "editing_task" not in st.session_state:
+        st.session_state.editing_task = None
+    if "creating_task" not in st.session_state:
+        st.session_state.creating_task = False
+    if "delete_task" not in st.session_state:
+        st.session_state.delete_task = None
+
+    # Listagem visual das tarefas em cards
+    st.subheader("Tarefas cadastradas")
+    available_tasks = task_manager.list_available_task_types()
+    if not available_tasks:
+        st.warning("Nenhuma tarefa cadastrada.")
+    else:
+        cols = st.columns(4)
+        for idx, task_type in enumerate(available_tasks):
+            info = task_manager.get_task_info(task_type) or {}
+            icon = TASK_ICONS.get(task_type, "📋")
+            nome_amigavel = NOMES_TAREFAS.get(task_type, task_type.replace("_", " ").title())
+            with cols[idx % 4]:
+                with st.expander(f"{icon} {nome_amigavel}", expanded=False):
+                    st.markdown(f"**Descrição:** {info.get('description', '*Sem descrição*')}")
+                    st.markdown(f"**Agente:** {info.get('agent', '*Não definido*')}")
+                    st.markdown(f"**Saída Esperada:** {info.get('expected_output', '*Não especificado*')}")
+                    st.markdown(f"**Contexto:** {info.get('context', '-')}")
+                    st.markdown(f"**Ferramentas:** {', '.join(info.get('tools', [])) if info.get('tools') else '_Nenhuma_'}")
+                    st.markdown(f"**Parâmetros:** {info.get('parameters', '-')}")
+                    st.markdown(f"**Formato de Saída:** {info.get('output_format', '-')}")
+                    st.markdown(f"**Dependências:** {', '.join(info.get('dependencies', [])) if info.get('dependencies') else '-'}")
+                    st.markdown(f"**Prazo:** {info.get('deadline', '-')}")
+                    st.markdown(f"**Status:** {info.get('status', '-')}")
+                    colb1, colb2 = st.columns(2)
+                    with colb1:
+                        if st.button("✏️ Editar", key=f"edit_{task_type}"):
+                            st.session_state.editing_task = task_type
+                            st.session_state.creating_task = False
+                    with colb2:
+                        if st.button("🗑️ Excluir", key=f"delete_{task_type}"):
+                            st.session_state.delete_task = task_type
+
+    # Confirmação de exclusão
+    if st.session_state.delete_task:
+        task_to_delete = st.session_state.delete_task
+        info = task_manager.get_task_info(task_to_delete) or {}
+        st.warning(f"Deseja realmente excluir a tarefa **{NOMES_TAREFAS.get(task_to_delete, task_to_delete)}**?", icon="⚠️")
         col1, col2 = st.columns(2)
-        col1.metric("Total de Tipos de Tarefas", len(available_tasks), help="Número total de tarefas pré-configuradas no sistema.")
-        col2.metric("Tarefas com Agente Atribuído", tasks_with_agents, help="Tarefas que já possuem um agente padrão definido.")
-    except Exception as e:
-        st.error(f"Não foi possível carregar as estatísticas das tarefas: {e}")
+        with col1:
+            if st.button("Confirmar Exclusão", key="confirm_delete_task"):
+                try:
+                    task_manager.delete_task(task_to_delete)
+                    st.success(f"Tarefa '{NOMES_TAREFAS.get(task_to_delete, task_to_delete)}' excluída com sucesso!")
+                except Exception as e:
+                    st.error(f"Erro ao excluir tarefa: {e}")
+                st.session_state.delete_task = None
+                st.experimental_rerun()
+        with col2:
+            if st.button("Cancelar", key="cancel_delete_task"):
+                st.session_state.delete_task = None
 
+    # Formulário de criação/edição
+    def show_task_form(form_title, task_data, edit_key=None):
+        with st.form(key="form_create_edit_task"):
+            st.markdown(f"#### {form_title}")
+            description = st.text_area("Descrição da tarefa", value=task_data.get("description", ""))
+            agent = st.selectbox("Agente responsável", options=["-"] + agent_manager.list_available_agent_types(), index=0 if not task_data.get("agent") else agent_manager.list_available_agent_types().index(task_data.get("agent")) + 1)
+            expected_output = st.text_area("Saída esperada", value=task_data.get("expected_output", ""))
+            context = st.text_area("Contexto (opcional)", value=task_data.get("context", ""))
+            all_tools = tools_manager.list_available_tool_types() if hasattr(tools_manager, 'list_available_tool_types') else []
+            selected_tools = st.multiselect("Ferramentas habilitadas", options=all_tools, default=task_data.get("tools", []))
+            parameters = st.text_area("Parâmetros (JSON opcional)", value=str(task_data.get("parameters", "")))
+            output_format = st.text_input("Formato de saída (opcional)", value=task_data.get("output_format", ""))
+            dependencies = st.text_area("Dependências (lista de tarefas, opcional)", value=", ".join(task_data.get("dependencies", [])))
+            deadline = st.date_input("Prazo (opcional)", value=task_data.get("deadline", date.today()) if task_data.get("deadline") else date.today())
+            status = st.text_input("Status (opcional)", value=task_data.get("status", ""))
+            submitted = st.form_submit_button("Salvar")
+            if submitted:
+                try:
+                    task_manager.save_task(
+                        description=description,
+                        agent=agent if agent != "-" else None,
+                        expected_output=expected_output,
+                        context=context,
+                        tools=list(selected_tools),
+                        parameters=parameters,
+                        output_format=output_format,
+                        dependencies=[d.strip() for d in dependencies.split(",") if d.strip()],
+                        deadline=str(deadline),
+                        status=status,
+                        edit_key=edit_key
+                    )
+                    st.success(f"Tarefa salva com sucesso!")
+                    st.session_state.editing_task = None
+                    st.session_state.creating_task = False
+                    st.experimental_rerun()
+                except Exception as e:
+                    st.error(f"Erro ao salvar tarefa: {e}")
+        if st.button("Cancelar", key="cancel_form_task"):
+            st.session_state.editing_task = None
+            st.session_state.creating_task = False
+
+    # Botão para criar nova tarefa
     st.markdown("---")
-    
-    # Lista detalhada de tarefas
-    st.subheader("📋 Detalhes das Tarefas Disponíveis")
-    
+    if st.button("➕ Adicionar nova tarefa"):
+        st.session_state.creating_task = True
+        st.session_state.editing_task = None
+
+    if st.session_state.creating_task:
+        show_task_form("Nova Tarefa", {
+            "description": "",
+            "agent": "",
+            "expected_output": "",
+            "context": "",
+            "tools": [],
+            "parameters": "",
+            "output_format": "",
+            "dependencies": [],
+            "deadline": str(date.today()),
+            "status": ""
+        }, edit_key=None)
+
+    if st.session_state.editing_task:
+        task_key = st.session_state.editing_task
+        info = task_manager.get_task_info(task_key) or {}
+        show_task_form(f"Editar Tarefa: {NOMES_TAREFAS.get(task_key, task_key)}", info, edit_key=task_key)
+
+    # Visualização do YAML de configuração
+    st.markdown("---")
+    st.subheader("📄 Visualizar Configuração Atual (`tasks.yaml`)")
     try:
-        if not available_tasks:
-            st.warning("Nenhuma tarefa encontrada. Verifique o arquivo `app/config/tasks.yaml`.")
-        else:
-            for task_type in available_tasks:
-                info = task_manager.get_task_info(task_type) or {}
-                
-                nome_amigavel = NOMES_TAREFAS.get(task_type, task_type.replace("_", " ").title())
-                icon = get_task_category_icon(task_type)
-                
-                with st.expander(f"{icon} **{nome_amigavel}** (`{task_type}`)", expanded=False):
-                    description = info.get("description", "*Sem descrição*")
-                    expected_output = info.get("expected_output", "*Não especificado*")
-                    agent_name = info.get("agent", "Nenhum")
-
-                    st.markdown(f"**Descrição**: {description}")
-                    st.markdown(f"**Saída Esperada**: {expected_output}")
-
-                    st.markdown(f"**Agente Responsável Padrão**: `{agent_name}`")
-                    
-                    if agent_name != "Nenhum":
-                        agent_info = agent_manager.get_agent_info(agent_name)
-                        if agent_info:
-                            st.success(f"✅ Agente **{agent_info.get('name', agent_name)}** encontrado e pronto para uso.")
-                        else:
-                            st.error(f"❌ O agente **{agent_name}** não foi encontrado. Verifique a configuração.")
-
-                    if "parameters" in info:
-                        st.markdown("**Parâmetros da Tarefa:**")
-                        st.json(info["parameters"])
+        with open("app/config/tasks.yaml", "r", encoding="utf-8") as f:
+            st.code(f.read(), language="yaml")
     except Exception as e:
-        st.error(f"Ocorreu um erro ao carregar os detalhes das tarefas: {e}")
+        st.error(f"Erro ao ler arquivo de configuração: {e}")
 
-    # Informações sobre configuração
     st.markdown("---")
-    st.subheader("ℹ️ Informações sobre Configuração")
-    
-    st.info("""
-    As tarefas são configuradas no arquivo `app/config/tasks.yaml`. 
-    Para adicionar ou modificar uma tarefa, edite este arquivo e recarregue a aplicação.
-    """)
-    
-    # Visualizar configuração atual
-    with st.expander("📄 Visualizar Configuração Atual (`tasks.yaml`)"):
-        try:
-            with open("app/config/tasks.yaml", "r", encoding="utf-8") as f:
-                current_config = f.read()
-            st.code(current_config, language="yaml")
-        except Exception as e:
-            st.error(f"Erro ao ler arquivo de configuração: {e}")
-
-    # Exemplos de uso
-    st.markdown("---")
-    st.subheader("💡 Exemplos de Uso")
-    
-    examples = [
-        {
-            "title": "Pesquisa Completa",
-            "description": "Pesquisar sobre um tópico e gerar relatório",
-            "tasks": ["research_task", "analysis_task", "writing_task"],
-            "agents": ["researcher", "analyst", "writer"]
-        },
-        {
-            "title": "Análise de Dados",
-            "description": "Analisar dados e gerar insights",
-            "tasks": ["analysis_task", "writing_task"],
-            "agents": ["analyst", "writer"]
-        },
-        {
-            "title": "Análise de Planilhas",
-            "description": "Comparar e analisar planilhas Excel",
-            "tasks": ["excel_analysis_task"],
-            "agents": ["excel_analyst"]
-        }
-    ]
-    
-    for example in examples:
-        with st.expander(f"📋 {example['title']}", expanded=False):
-            st.write(f"**Descrição:** {example['description']}")
-            st.write("**Tarefas:** " + ", ".join([str(NOMES_TAREFAS.get(t, t)) for t in example['tasks']]))
-            st.write(f"**Agentes:** {', '.join(example['agents'])}") 
+    st.caption("Desenvolvido com CrewAI e Streamlit • © 2024")

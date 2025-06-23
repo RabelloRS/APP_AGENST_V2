@@ -216,8 +216,20 @@ class ToolsManager:
         return categories
 
     def get_tool_function(self, tool_name: str):
-        """Retorna a função de uma tool"""
+        """Retorna a função de uma tool. Se não for customizada, retorna None (apenas para tools locais)."""
+        # Primeiro tenta buscar entre as customizadas
         return self.tools_functions.get(tool_name)
+
+    def get_tool_class(self, tool_name: str):
+        """Tenta importar e retornar a classe de uma tool nativa do crewai_tools pelo nome exato."""
+        try:
+            import importlib
+            module_name = f"crewai_tools.tools.{tool_name.lower()}"
+            tool_module = importlib.import_module(module_name)
+            tool_class = getattr(tool_module, tool_name)
+            return tool_class
+        except Exception:
+            return None
 
     def get_tools_for_agent(self, agent_type: str) -> List[str]:
         """Retorna as tools atribuídas a um agente específico"""

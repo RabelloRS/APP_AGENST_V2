@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorador de Ferramentas CrewAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF6;
+            color: #4A4A4A;
+        }
+        .sidebar {
+            background-color: #F5F1EC;
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            border-left: 3px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            background-color: #E3D5C9;
+            color: #2c2c2c;
+            border-left-color: #8E9B8D;
+        }
+        .tool-card {
+            background-color: #FFFFFF;
+            border: 1px solid #E3D5C9;
+            border-radius: 0.75rem;
+            transition: box-shadow 0.3s ease;
+        }
+        .tool-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .tool-description {
+            padding: 0 1rem 1rem 1rem;
+            color: #5a5a5a;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .tool-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .tool-details.open {
+            max-height: 1500px;
+        }
+        .code-block {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #4a5568;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .copy-btn:hover {
+            background-color: #2c3440;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 40vh;
+        }
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .tag-api { background-color: #e6fffa; color: #234e52; }
+        .tag-dependency { background-color: #fefcbf; color: #744210; }
+        .tag-variable { background-color: #fed7d7; color: #822727; }
+
+        /* Syntax Highlighting */
+        .code-block .hl-keyword { color: #f97583; }
+        .code-block .hl-string { color: #a5d6ff; }
+        .code-block .hl-comment { color: #8d949b; }
+        .code-block .hl-function { color: #addb67; }
+        .code-block .hl-class { color: #e5c07b; }
+        .code-block .hl-number { color: #d19a66; }
+    </style>
+</head>
+<body class="antialiased">
+
+<div class="relative min-h-screen md:flex">
+    <div class="md:hidden flex justify-between items-center p-4 bg-[#F5F1EC] border-b border-[#E3D5C9]">
+        <h1 class="text-xl font-bold text-[#4A4A4A]">Explorador CrewAI</h1>
+        <button id="mobile-menu-button" class="text-[#4A4A4A] focus:outline-none">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+    </div>
+
+    <aside id="sidebar" class="sidebar w-64 p-6 space-y-2 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out z-20">
+        <h1 class="text-2xl font-bold text-[#4A4A4A] mb-6">Explorador CrewAI</h1>
+        <nav id="navigation">
+            <a href="#introduction" class="nav-link active block py-2.5 px-4 rounded font-medium">Introdução</a>
+            <a href="#arquivo" class="nav-link block py-2.5 px-4 rounded font-medium">Arquivo e Documento</a>
+            <a href="#scraping" class="nav-link block py-2.5 px-4 rounded font-medium">Web Scraping</a>
+            <a href="#busca" class="nav-link block py-2.5 px-4 rounded font-medium">Busca e Pesquisa</a>
+            <a href="#dados" class="nav-link block py-2.5 px-4 rounded font-medium">Banco de Dados</a>
+            <a href="#ia" class="nav-link block py-2.5 px-4 rounded font-medium">IA e ML</a>
+            <a href="#nuvem" class="nav-link block py-2.5 px-4 rounded font-medium">Nuvem e Armazenamento</a>
+            <a href="#automacao" class="nav-link block py-2.5 px-4 rounded font-medium">Automação</a>
+            <a href="#custom" class="nav-link block py-2.5 px-4 rounded font-medium">Ferramentas Customizadas</a>
+            <a href="#conclusion" class="nav-link block py-2.5 px-4 rounded font-medium">Conclusão</a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-6 sm:p-8 lg:p-12">
+        <div id="content-container">
+            </div>
+    </main>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const toolsData = {
+        introduction: {
+            title: "Guia Abrangente das Ferramentas CrewAI para Agentes",
+            content: `
+                <p class="mb-4 text-lg">O CrewAI é um framework robusto e flexível, desenvolvido em Python, que permite a criação de equipes de agentes de inteligência artificial (IA) autônomos. Estes agentes são projetados para colaborar de forma eficaz na resolução de tarefas complexas. No ecossistema CrewAI, as ferramentas representam um pilar fundamental, capacitando os agentes a interagir com o mundo exterior, acessar serviços, manipular dados e executar ações específicas.</p>
+                <p class="mb-6">Esta aplicação interativa serve como um guia para explorar a vasta biblioteca de mais de 40 ferramentas pré-construídas. Navegue pelas categorias na barra lateral para descobrir as capacidades disponíveis para seus agentes.</p>
+                <h3 class="text-2xl font-semibold mb-4 text-center">Distribuição de Ferramentas por Categoria</h3>
+                <div class="chart-container mb-8">
+                    <canvas id="toolsChart"></canvas>
+                </div>
+                <h3 class="text-2xl font-semibold mb-4">Como Utilizar Ferramentas</h3>
+                <p class="mb-4">A integração de ferramentas em um projeto CrewAI segue um processo padronizado: importar a ferramenta, adicioná-la à lista de ferramentas do agente e configurar quaisquer chaves de API ou dependências necessárias. A maioria das ferramentas pode ser instalada com <code class="bg-gray-200 text-sm p-1 rounded">pip install 'crewai[tools]'</code>, mas algumas exigem pacotes adicionais.</p>
+            `,
+            tools: []
+        },
+        arquivo: {
+            title: "Ferramentas de Arquivo e Documento",
+            content: `<p class="mb-6">Estas ferramentas permitem que os agentes interajam eficientemente com diversos formatos de arquivo, realizando operações como leitura, escrita e busca em documentos como PDF, DOCX, JSON, CSV, e mais. São essenciais para automatizar fluxos de trabalho que envolvem processamento intensivo de documentos.</p>`,
+            tools: [
+                {
+                    name: 'Ferramenta de Leitura de Arquivos',
+                    importName: 'FileReadTool',
+                    description: 'Uma ferramenta fundamental concebida para ler arquivos diretamente do sistema de arquivos local. É versátil, suportando uma ampla gama de formatos de arquivo baseados em texto, como .txt, .csv, e .json. Uma característica notável é sua capacidade de converter automaticamente o conteúdo de arquivos JSON em um dicionário Python, o que simplifica o processamento dos dados.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>file_path</strong>: Caminho para o arquivo a ser lido.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> FileReadTool\n\n<span class="hl-comment"># Para ler qualquer arquivo que o agente possa descobrir o caminho</span>\nleitor_de_arquivos <span class="hl-keyword">=</span> <span class="hl-class">FileReadTool</span>()\n\n<span class="hl-comment"># Para inicializar com um caminho de arquivo específico</span>\nleitor_especifico <span class="hl-keyword">=</span> <span class="hl-class">FileReadTool</span>(file_path<span class="hl-keyword">=</span><span class="hl-string">'caminho/para/arquivo.txt'</span>)`
+                },
+                {
+                    name: 'Ferramenta de Escrita de Arquivos',
+                    importName: 'FileWriterTool',
+                    description: 'Um componente essencial para simplificar a operação de escrita de conteúdo em arquivos. É compatível entre diferentes sistemas operacionais (Windows, Linux, macOS) e particularmente útil para tarefas como geração automatizada de relatórios, salvamento de logs e criação de arquivos de configuração.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>filename</strong>: Nome do arquivo a ser criado.'},
+                        { type: 'variable', text: '<strong>content</strong>: Conteúdo a ser gravado.'},
+                        { type: 'variable', text: '<strong>directory</strong> (opcional): Diretório para salvar o arquivo.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> FileWriterTool\n\nferramenta_escrita <span class="hl-keyword">=</span> <span class="hl-class">FileWriterTool</span>()\n\n<span class="hl-comment"># Exemplo de uso</span>\nferramenta_escrita.<span class="hl-function">_run</span>(\n  filename<span class="hl-keyword">=</span><span class="hl-string">'relatorio.txt'</span>,\n  content<span class="hl-keyword">=</span><span class="hl-string">'Conteúdo do relatório...'</span>,\n  directory<span class="hl-keyword">=</span><span class="hl-string">'./output'</span>\n)`
+                },
+                {
+                    name: 'Ferramenta de Busca em PDF',
+                    importName: 'PDFSearchTool',
+                    description: 'Uma ferramenta de Geração Aumentada por Recuperação (RAG) para realizar buscas semânticas dentro de documentos PDF. Ela utiliza técnicas de busca avançadas para identificar e extrair conteúdo relevante de forma eficiente, sendo inestimável para obter informações específicas de grandes volumes de PDFs.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>pdf</strong> (opcional): Caminho para o arquivo PDF a ser pesquisado.'},
+                        { type: 'variable', text: '<strong>config</strong> (opcional): Dicionário para LLM/Embedder customizado.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> PDFSearchTool\n\n<span class="hl-comment"># Busca em qualquer PDF (caminho fornecido em tempo de execução)</span>\nbusca_pdf <span class="hl-keyword">=</span> <span class="hl-class">PDFSearchTool</span>()\n\n<span class="hl-comment"># Busca em um PDF específico</span>\nbusca_pdf_especifico <span class="hl-keyword">=</span> <span class="hl-class">PDFSearchTool</span>(pdf<span class="hl-keyword">=</span><span class="hl-string">'docs/meu_documento.pdf'</span>)`
+                },
+                {
+                    name: 'Ferramenta de Busca em DOCX',
+                    importName: 'DOCXSearchTool',
+                    description: 'Uma ferramenta RAG projetada para realizar buscas semânticas eficazes dentro de documentos DOCX. Simplifica o processo de localização de dados específicos em grandes coleções de documentos Word, sendo valiosa para análise de dados e gerenciamento de informações.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]' docx2txt" },
+                        { type: 'variable', text: '<strong>docx</strong> (opcional): Caminho para o arquivo DOCX.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> DOCXSearchTool\n\nbusca_docx <span class="hl-keyword">=</span> <span class="hl-class">DOCXSearchTool</span>(docx<span class="hl-keyword">=</span><span class="hl-string">'docs/relatorio.docx'</span>)`
+                },
+                {
+                    name: 'Ferramenta de Busca em JSON',
+                    importName: 'JSONSearchTool',
+                    description: 'Uma ferramenta especializada para realizar buscas eficientes em arquivos JSON. Emprega um mecanismo de busca RAG, o que permite buscas altamente direcionadas dentro de um arquivo JSON específico, aprimorando significativamente a precisão dos resultados.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>json_path</strong> (opcional): Caminho para o arquivo JSON.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> JSONSearchTool\n\nbusca_json <span class="hl-keyword">=</span> <span class="hl-class">JSONSearchTool</span>(json_path<span class="hl-keyword">=</span><span class="hl-string">'dados.json'</span>)`
+                },
+                {
+                    name: 'Ferramenta de Busca em CSV',
+                    importName: 'CSVSearchTool',
+                    description: 'Uma ferramenta RAG projetada para conduzir buscas semânticas dentro do conteúdo de arquivos CSV. É particularmente útil para extrair informações de grandes conjuntos de dados CSV onde os métodos de busca tradicionais seriam ineficientes.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>csv</strong> (opcional): Caminho para o arquivo CSV.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> CSVSearchTool\n\nbusca_csv <span class="hl-keyword">=</span> <span class="hl-class">CSVSearchTool</span>(csv<span class="hl-keyword">=</span><span class="hl-string">'planilha.csv'</span>)`
+                },
+                {
+                    name: 'Ferramenta de Busca em XML',
+                    importName: 'XMLSearchTool',
+                    description: 'Uma ferramenta RAG especializada na execução de buscas semânticas dentro de arquivos XML. É ideal para usuários que necessitam analisar e extrair informações de conteúdo XML de forma eficiente, permitindo buscas precisas e a obtenção de resultados relevantes.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>xml</strong> (opcional): Caminho para o arquivo XML.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> XMLSearchTool\n\nbusca_xml <span class="hl-keyword">=</span> <span class="hl-class">XMLSearchTool</span>(xml<span class="hl-keyword">=</span><span class="hl-string">'config.xml'</span>)`
+                },
+                {
+                    name: 'Ferramenta de Busca em MDX',
+                    importName: 'MDXSearchTool',
+                    description: 'Um componente projetado para a extração avançada de conteúdo em linguagem markdown (MDX). Sua utilidade é notável em tarefas de análise de dados e pesquisa, pois otimiza o processo de localização de dados específicos em grandes coleções de documentos.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>mdx</strong> (opcional): Caminho para o arquivo MDX.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> MDXSearchTool\n\nbusca_mdx <span class="hl-keyword">=</span> <span class="hl-class">MDXSearchTool</span>(mdx<span class="hl-keyword">=</span><span class="hl-string">'docs.mdx'</span>)`
+                },
+                {
+                    name: 'Ferramenta de Busca em TXT',
+                    importName: 'TXTSearchTool',
+                    description: 'Uma ferramenta RAG desenvolvida para realizar buscas semânticas dentro do conteúdo de arquivos de texto simples. É um recurso valioso para a extração rápida de informações ou para a localização de seções específicas de texto com base na consulta fornecida.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>txt</strong> (opcional): Caminho para o arquivo TXT.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> TXTSearchTool\n\nbusca_txt <span class="hl-keyword">=</span> <span class="hl-class">TXTSearchTool</span>(txt<span class="hl-keyword">=</span><span class="hl-string">'notas.txt'</span>)`
+                },
+                {
+                    name: 'Ferramenta de Busca em Diretório',
+                    importName: 'DirectorySearchTool',
+                    description: 'Uma poderosa ferramenta RAG projetada para realizar buscas semânticas dentro do conteúdo de um diretório. Ela permite que os agentes executem buscas semânticas em diretórios especificados, utilizando a metodologia RAG para navegar eficientemente através dos arquivos.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>directory</strong> (opcional): Caminho do diretório.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> DirectorySearchTool\n\nbusca_dir <span class="hl-keyword">=</span> <span class="hl-class">DirectorySearchTool</span>(directory<span class="hl-keyword">=</span><span class="hl-string">'./projetos'</span>)`
+                },
+                {
+                    name: 'Ferramenta de Leitura de Diretório',
+                    importName: 'DirectoryReadTool',
+                    description: 'Uma utilidade poderosa e versátil, concebida para fornecer uma listagem abrangente do conteúdo de um diretório. Sua capacidade de navegar recursivamente permite uma enumeração detalhada de todos os arquivos, incluindo aqueles em subdiretórios.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>directory</strong> (opcional): Caminho do diretório.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> DirectoryReadTool\n\nleitor_dir <span class="hl-keyword">=</span> <span class="hl-class">DirectoryReadTool</span>(directory<span class="hl-keyword">=</span><span class="hl-string">'./projetos'</span>)`
+                }
+            ]
+        },
+        scraping: {
+            title: "Ferramentas de Web Scraping e Navegação",
+            content: `<p class="mb-6">Capacite agentes a interagir com a web, extraindo dados de sites, automatizando interações com navegadores e raspando conteúdo em escala. Inclui ferramentas baseadas em Selenium, Firecrawl, e mais.</p>`,
+            tools: [
+                 {
+                    name: 'Ferramenta de Raspagem de Site',
+                    importName: 'ScrapeWebsiteTool',
+                    description: 'Uma ferramenta fundamental para a interação com o conteúdo web, projetada para extrair e ler o conteúdo completo de um site especificado. Sua funcionalidade baseia-se na realização de requisições HTTP e na análise do conteúdo HTML recebido.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>website_url</strong>: URL do site a ser raspado.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> ScrapeWebsiteTool\n\nraspador <span class="hl-keyword">=</span> <span class="hl-class">ScrapeWebsiteTool</span>(website_url<span class="hl-keyword">=</span><span class="hl-string">'https://www.example.com'</span>)`
+                },
+                {
+                    name: 'Ferramenta de Raspagem de Elemento de Site',
+                    importName: 'ScrapeElementFromWebsiteTool',
+                    description: 'Uma ferramenta precisa e eficiente que capacita os agentes CrewAI a extrair elementos específicos de sites, utilizando seletores CSS. Isso otimiza a coleta de dados, tornando-a mais focada e eficiente.',
+                     details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>website_url</strong>: URL do site.'},
+                        { type: 'variable', text: '<strong>css_element</strong>: Seletor CSS.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> ScrapeElementFromWebsiteTool\n\nscrape_element <span class="hl-keyword">=</span> <span class="hl-class">ScrapeElementFromWebsiteTool</span>(\n    website_url<span class="hl-keyword">=</span><span class="hl-string">'https://example.com'</span>,\n    css_element<span class="hl-keyword">=</span><span class="hl-string">'h1'</span>\n)`
+                },
+                {
+                    name: 'Ferramenta de Raspagem de Site com Scrapfly',
+                    importName: 'ScrapflyScrapeWebsiteTool',
+                    description: 'Uma ferramenta avançada que aproveita a API da Scrapfly. Oferece capacidades sofisticadas, incluindo suporte a navegadores headless, uso de proxies e recursos para contornar mecanismos anti-bot.',
+                    details: [
+                        { type: 'dependency', text: 'uv add scrapfly-sdk' },
+                        { type: 'api', text: 'SCRAPFLY_API_KEY' },
+                        { type: 'variable', text: '<strong>url</strong>: URL do site.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> ScrapflyScrapeWebsiteTool\n\nscrapfly_tool <span class="hl-keyword">=</span> <span class="hl-class">ScrapflyScrapeWebsiteTool</span>()`
+                },
+                {
+                    name: 'Raspador Selenium',
+                    importName: 'SeleniumScrapingTool',
+                    description: 'Desenvolvida para extrair conteúdo de sites utilizando o framework Selenium. Sua grande vantagem é a capacidade de interagir com conteúdo dinâmico e JavaScript, algo que raspadores baseados apenas em requisições HTTP não conseguem fazer.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>website_url</strong>: URL do site.'},
+                        { type: 'variable', text: '<strong>css_element</strong>: Seletor CSS do elemento a ser extraído.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> SeleniumScrapingTool\n\nselenium_tool <span class="hl-keyword">=</span> <span class="hl-class">SeleniumScrapingTool</span>(\n    website_url<span class="hl-keyword">=</span><span class="hl-string">'https://www.example.com'</span>,\n    css_element<span class="hl-keyword">=</span><span class="hl-string">'.main-content'</span>\n)`
+                },
+                {
+                    name: 'Ferramenta de Raspagem com Scrapegraph',
+                    importName: 'ScrapegraphScrapeTool',
+                    description: 'Uma ferramenta inovadora que utiliza a SmartScraper API da Scrapegraph AI para extrair conteúdo de sites de forma inteligente. Diferente dos raspadores tradicionais, é capaz de compreender o contexto e a estrutura das páginas web, extraindo informações com base em prompts de linguagem natural.',
+                    details: [
+                        { type: 'dependency', text: 'uv add scrapegraph-py' },
+                        { type: 'api', text: 'SCRAPEGRAPH_API_KEY' },
+                        { type: 'variable', text: '<strong>website_url</strong>: URL do site.' },
+                        { type: 'variable', text: '<strong>user_prompt</strong>: Prompt para guiar a extração.' }
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> ScrapegraphScrapeTool\n\nscrapegraph_tool <span class="hl-keyword">=</span> <span class="hl-class">ScrapegraphScrapeTool</span>(\n    website_url<span class="hl-keyword">=</span><span class="hl-string">"https://example.com"</span>,\n    user_prompt<span class="hl-keyword">=</span><span class="hl-string">"Extraia o título principal e o primeiro parágrafo."</span>\n)`
+                },
+                 {
+                    name: 'Ferramenta de Carregamento de Navegador Browserbase',
+                    importName: 'BrowserbaseLoadTool',
+                    description: 'Uma ferramenta para automação de navegador baseada em nuvem com a infraestrutura Browserbase. É destacada por sua capacidade de oferecer escalabilidade para cenários que exigem automação de navegador em larga escala.',
+                    details: [
+                       { type: 'variable', text: "Detalhes de implementação não disponíveis no relatório fonte. Consulte a documentação oficial."}
+                    ],
+                    code: `<span class="hl-comment"># Exemplo de código não disponível.</span>`
+                },
+                {
+                    name: 'Ferramenta de Carregamento Hyperbrowser',
+                    importName: 'HyperbrowserLoadTool',
+                    description: 'Facilita o web scraping e o crawling utilizando a plataforma Hyperbrowser, especializada na execução e escalonamento de navegadores headless. Oferece escalabilidade instantânea e capacidade de contornar medidas anti-bot, incluindo resolução de CAPTCHAs e proxies rotativos.',
+                    details: [
+                        { type: 'dependency', text: 'uv add hyperbrowser' },
+                        { type: 'api', text: 'HYPERBROWSER_API_KEY' },
+                        { type: 'variable', text: '<strong>url</strong>: URL do site.' },
+                        { type: 'variable', text: "<strong>operation</strong>: 'scrape' ou 'crawl'." }
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> HyperbrowserLoadTool\n\nhyperbrowser <span class="hl-keyword">=</span> <span class="hl-class">HyperbrowserLoadTool</span>(api_key<span class="hl-keyword">=</span><span class="hl-string">"sua_api_key"</span>)`
+                },
+                 {
+                    name: 'Ferramenta Stagehand',
+                    importName: 'StagehandTool',
+                    description: 'Integra o framework Stagehand, permitindo que os agentes interajam com sites e automatizem tarefas de navegador utilizando instruções em linguagem natural. Capacita agentes a navegar, clicar, preencher formulários e extrair dados de forma complexa.',
+                    details: [
+                        { type: 'dependency', text: "pip install stagehand-py" },
+                        { type: 'api', text: "Browserbase API Key" },
+                        { type: 'api', text: "LLM API Key (OpenAI/Anthropic)" },
+                        { type: 'variable', text: '<strong>api_key</strong>, <strong>project_id</strong>, <strong>model_api_key</strong>'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> StagehandTool\n<span class="hl-keyword">from</span> stagehand.schemas <span class="hl-keyword">import</span> AvailableModel\n\n<span class="hl-keyword">with</span> <span class="hl-class">StagehandTool</span>(\n    api_key<span class="hl-keyword">=</span><span class="hl-string">"sua_api_key_browserbase"</span>,\n    project_id<span class="hl-keyword">=</span><span class="hl-string">"seu_project_id"</span>,\n    model_api_key<span class="hl-keyword">=</span><span class="hl-string">"sua_api_key_llm"</span>\n) <span class="hl-keyword">as</span> stagehand:\n    <span class="hl-comment"># ... seu código do agente aqui</span>\n    <span class="hl-keyword">pass</span>`
+                },
+                {
+                    name: 'Ferramenta de Rastreamento de Site Firecrawl',
+                    importName: 'FirecrawlCrawlWebsiteTool',
+                    description: 'Uma ferramenta especializada, projetada para rastrear sites e converter seu conteúdo em markdown limpo ou dados estruturados. Ela opera utilizando a plataforma Firecrawl, que é dedicada a este processo de conversão eficiente.',
+                    details: [
+                        { type: 'dependency', text: "Instalar SDK Firecrawl" },
+                        { type: 'api', text: "FIRECRAWL_API_KEY" },
+                        { type: 'variable', text: '<strong>url</strong>: URL base para o rastreamento.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> FirecrawlCrawlWebsiteTool\n\nfirecrawl_crawl <span class="hl-keyword">=</span> <span class="hl-class">FirecrawlCrawlWebsiteTool</span>(url<span class="hl-keyword">=</span><span class="hl-string">'https://firecrawl.dev'</span>)`
+                },
+                {
+                    name: 'Ferramenta de Busca Firecrawl',
+                    importName: 'FirecrawlSearchTool',
+                    description: 'Desenvolvida para realizar buscas em sites e, subsequentemente, converter o conteúdo encontrado em markdown limpo ou dados estruturados. Assim como a ferramenta de rastreamento, ela se baseia na plataforma Firecrawl.',
+                    details: [
+                        { type: 'dependency', text: "Instalar SDK Firecrawl" },
+                        { type: 'api', text: "FIRECRAWL_API_KEY" },
+                        { type: 'variable', text: '<strong>query</strong>: Consulta de busca.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> FirecrawlSearchTool\n\nfirecrawl_search <span class="hl-keyword">=</span> <span class="hl-class">FirecrawlSearchTool</span>(query<span class="hl-keyword">=</span><span class="hl-string">'o que é firecrawl?'</span>)`
+                }
+            ]
+        },
+        busca: {
+            title: "Ferramentas de Busca e Pesquisa",
+            content: `<p class="mb-6">Expanda a capacidade dos agentes para coletar informações de fontes online. Permite buscas na web (Serper, Brave, Exa), em repositórios de código (GitHub) e plataformas de vídeo (YouTube).</p>`,
+            tools: [
+                {
+                    name: 'Ferramenta Serper Dev',
+                    importName: 'SerperDevTool',
+                    description: 'Uma ferramenta essencial para a realização de buscas na internet, projetada para retornar os resultados mais relevantes com base em uma consulta específica, utilizando a API serper.dev.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'api', text: "SERPER_API_KEY" },
+                        { type: 'variable', text: '<strong>search_query</strong>: Consulta de busca.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> SerperDevTool\n\nsearch_tool <span class="hl-keyword">=</span> <span class="hl-class">SerperDevTool</span>()`
+                },
+                {
+                    name: 'Ferramenta de Busca Brave',
+                    importName: 'BraveSearchTool',
+                    description: 'Desenvolvida para realizar buscas na internet, utilizando a API de Busca Brave. Ela permite que os agentes executem consultas e recuperem resultados relevantes, com um foco particular na privacidade.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'api', text: "BRAVE_API_KEY" },
+                        { type: 'variable', text: '<strong>search_query</strong>: Consulta de busca.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> BraveSearchTool\n\nbrave_search <span class="hl-keyword">=</span> <span class="hl-class">BraveSearchTool</span>()`
+                },
+                {
+                    name: 'Ferramenta de Busca Exa',
+                    importName: 'EXASearchTool',
+                    description: 'Projetada para executar buscas semânticas em toda a internet, baseando-se em uma consulta derivada do conteúdo de um texto. Ela utiliza a API exa.ai para garantir que a pesquisa seja contextualmente alinhada com a intenção do usuário.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'api', text: "EXA_API_KEY" }
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> EXASearchTool\n\nexa_search <span class="hl-keyword">=</span> <span class="hl-class">EXASearchTool</span>()`
+                },
+                {
+                    name: 'Ferramenta de Busca LinkUp',
+                    importName: 'LinkupSearchTool',
+                    description: 'Permite que os agentes consultem a API da Linkup para obter informações contextuais e recuperar resultados estruturados, enriquecendo fluxos de trabalho com dados atualizados e confiáveis.',
+                    details: [
+                        { type: 'dependency', text: 'uv add linkup-sdk' },
+                        { type: 'api', text: 'LINKUP_API_KEY' },
+                        { type: 'variable', text: '<strong>query</strong>: Termo de busca.' }
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> LinkupSearchTool\n<span class="hl-keyword">import</span> os\n\nlinkup_tool <span class="hl-keyword">=</span> <span class="hl-class">LinkupSearchTool</span>(api_key<span class="hl-keyword">=</span>os.<span class="hl-function">getenv</span>(<span class="hl-string">"LINKUP_API_KEY"</span>))`
+                },
+                {
+                    name: 'Ferramenta de Busca GitHub',
+                    importName: 'GithubSearchTool',
+                    description: 'Uma ferramenta RAG projetada para realizar buscas semânticas dentro de repositórios GitHub. Emprega capacidades avançadas para filtrar e localizar informações relevantes em código, pull requests, issues e repositórios inteiros.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'api', text: "GH_TOKEN (GitHub PAT)" },
+                        { type: 'variable', text: '<strong>github_repo</strong>: Repositório alvo.'},
+                        { type: 'variable', text: "<strong>content_types</strong>: ['code', 'repo', 'pr', 'issue']"}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> GithubSearchTool\n\ngithub_search <span class="hl-keyword">=</span> <span class="hl-class">GithubSearchTool</span>(\n    gh_token<span class="hl-keyword">=</span><span class="hl-string">'seu_github_pat'</span>,\n    content_types<span class="hl-keyword">=</span>[<span class="hl-string">'code'</span>, <span class="hl-string">'issue'</span>]\n)`
+                },
+                {
+                    name: 'Ferramenta de Busca em Site',
+                    importName: 'WebsiteSearchTool',
+                    description: 'Uma ferramenta RAG em fase experimental, desenvolvida para realizar buscas semânticas no conteúdo de sites. Seu objetivo é permitir buscas eficientes, navegando e extraindo informações de URLs especificadas por meio de modelos avançados.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>website</strong> (opcional): URL do site para busca direcionada.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> WebsiteSearchTool\n\nwebsite_search <span class="hl-keyword">=</span> <span class="hl-class">WebsiteSearchTool</span>(website<span class="hl-keyword">=</span><span class="hl-string">'https://example.com'</span>)`
+                },
+                {
+                    name: 'Ferramenta de Busca em Documentos de Código',
+                    importName: 'CodeDocsSearchTool',
+                    description: 'Uma poderosa ferramenta RAG em fase experimental, projetada para buscas semânticas em documentação de código. Permite encontrar informações específicas de forma eficiente dentro de vastos volumes de documentação técnica.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>docs_url</strong> (opcional): URL da documentação.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> CodeDocsSearchTool\n\ncode_docs_search <span class="hl-keyword">=</span> <span class="hl-class">CodeDocsSearchTool</span>(docs_url<span class="hl-keyword">=</span><span class="hl-string">'https://docs.example.com'</span>)`
+                },
+                {
+                    name: 'Busca em Canal do YouTube',
+                    importName: 'YoutubeChannelSearchTool',
+                    description: 'Uma ferramenta RAG desenvolvida para realizar buscas semânticas dentro do conteúdo de um canal específico do YouTube. É extremamente valiosa para extrair informações ou encontrar conteúdo relevante sem a necessidade de vasculhar vídeos manualmente.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>youtube_channel_handle</strong>: Handle do canal (e.g., @canal).'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> YoutubeChannelSearchTool\n\nyoutube_channel_search <span class="hl-keyword">=</span> <span class="hl-class">YoutubeChannelSearchTool</span>(\n    youtube_channel_handle<span class="hl-keyword">=</span><span class="hl-string">'@exampleChannel'</span>\n)`
+                },
+                {
+                    name: 'Busca em Vídeo do YouTube',
+                    importName: 'YoutubeVideoSearchTool',
+                    description: 'Uma ferramenta RAG que realiza buscas semânticas dentro do conteúdo de vídeos específicos do YouTube. Oferece flexibilidade para buscar em qualquer vídeo ou para direcionar a busca para um vídeo específico, fornecendo sua URL.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>youtube_video_url</strong>: URL do vídeo.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> YoutubeVideoSearchTool\n\nyoutube_video_search <span class="hl-keyword">=</span> <span class="hl-class">YoutubeVideoSearchTool</span>(\n    youtube_video_url<span class="hl-keyword">=</span><span class="hl-string">'https://youtube.com/watch?v=example'</span>\n)`
+                }
+            ]
+        },
+        dados: {
+            title: "Ferramentas de Banco de Dados e Dados",
+            content: `<p class="mb-6">Facilite a interação dos agentes com sistemas de armazenamento. Permite a conexão e consulta a bancos de dados SQL (MySQL, PostgreSQL), data warehouses (Snowflake) e stores de vetores (Qdrant, Weaviate).</p>`,
+            tools: [
+                 {
+                    name: 'Ferramenta MySQL',
+                    importName: 'MySQLSearchTool',
+                    description: 'Uma ferramenta especializada para realizar buscas semânticas em tabelas de bancos de dados MySQL. Ela incorpora a tecnologia RAG para permitir consultas eficientes, simplificando a localização de dados relevantes por meio de consultas semânticas.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: '<strong>db_uri</strong>: URI de conexão do MySQL.' },
+                        { type: 'variable', text: '<strong>table_name</strong>: Nome da tabela para busca.' }
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> MySQLSearchTool\n\nmysql_tool <span class="hl-keyword">=</span> <span class="hl-class">MySQLSearchTool</span>(\n    db_uri<span class="hl-keyword">=</span><span class="hl-string">'mysql://user:pass@host:port/db'</span>,\n    table_name<span class="hl-keyword">=</span><span class="hl-string">'employees'</span>\n)`
+                },
+                {
+                    name: 'Busca PostgreSQL',
+                    importName: 'PGSearchTool',
+                    description: 'Uma ferramenta RAG otimizada para busca em bancos de dados PostgreSQL. É adequada para consultas de banco de dados, permitindo buscar e consultar informações de forma eficiente.',
+                    details: [
+                        { type: 'variable', text: "Detalhes de implementação não disponíveis no relatório fonte. Consulte a documentação oficial."}
+                    ],
+                    code: `<span class="hl-comment"># Exemplo de código não disponível.</span>`
+                },
+                {
+                    name: 'Busca Snowflake',
+                    importName: 'SnowflakeSearchTool',
+                    description: 'Uma ferramenta poderosa que permite executar consultas SQL e buscas semânticas em data warehouses Snowflake. É adequada para tarefas de análise de dados, geração de relatórios e inteligência de negócios que exigem acesso a dados corporativos.',
+                    details: [
+                        { type: 'dependency', text: "Dependências Snowflake" },
+                        { type: 'variable', text: '<strong>config</strong>: Objeto SnowflakeConfig com credenciais.' },
+                        { type: 'variable', text: '<strong>query</strong>: Consulta SQL a ser executada.' }
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> SnowflakeSearchTool\n\n<span class="hl-comment"># Requer um objeto de configuração Snowflake</span>\n<span class="hl-comment"># config = SnowflakeConfig(...)</span>\n<span class="hl-comment"># snowflake_tool = SnowflakeSearchTool(config=config)</span>`
+                },
+                {
+                    name: 'Ferramenta NL2SQL',
+                    importName: 'NL2SQLTool',
+                    description: 'Uma ferramenta inovadora projetada para converter automaticamente consultas em linguagem natural para instruções SQL. Permite que um agente acesse um banco de dados, recupere informações com base em um objetivo e utilize esses dados para gerar respostas ou relatórios.',
+                    details: [
+                        { type: 'dependency', text: "pip install sqlalchemy" },
+                        { type: 'dependency', text: "Driver do banco de dados (ex: psycopg2)" },
+                        { type: 'variable', text: '<strong>db_uri</strong>: URI de conexão do banco de dados.' }
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> NL2SQLTool\n\nnl2sql_tool <span class="hl-keyword">=</span> <span class="hl-class">NL2SQLTool</span>(db_uri<span class="hl-keyword">=</span><span class="hl-string">"postgresql://user:pass@host/db"</span>)`
+                },
+                {
+                    name: 'Busca Vetorial Qdrant',
+                    importName: 'QdrantVectorSearchTool',
+                    description: 'Confere capacidades de busca semântica aproveitando o Qdrant, um motor de busca de similaridade vetorial. Permite que agentes pesquisem documentos armazenados em uma coleção Qdrant utilizando a similaridade semântica, encontrando informações baseadas no significado.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'api', text: 'QDRANT_API_KEY' },
+                        { type: 'variable', text: '<strong>qdrant_url</strong>: URL do servidor Qdrant.' },
+                        { type: 'variable', text: '<strong>collection_name</strong>: Nome da coleção.' }
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> QdrantVectorSearchTool\n\nqdrant_tool <span class="hl-keyword">=</span> <span class="hl-class">QdrantVectorSearchTool</span>(\n    qdrant_url<span class="hl-keyword">=</span><span class="hl-string">"..."</span>,\n    qdrant_api_key<span class="hl-keyword">=</span><span class="hl-string">"..."</span>,\n    collection_name<span class="hl-keyword">=</span><span class="hl-string">"minha_colecao"</span>\n)`
+                },
+                {
+                    name: 'Busca Vetorial Weaviate',
+                    importName: 'WeaviateVectorSearchTool',
+                    description: 'Projetada para realizar buscas em um banco de dados vetorial Weaviate para encontrar documentos semanticamente similares. Supera as buscas tradicionais baseadas em palavras-chave, aproveitando o poder dos embeddings vetoriais para resultados mais precisos.',
+                    details: [
+                        { type: 'dependency', text: 'uv add weaviate-client' },
+                        { type: 'api', text: 'WEAVIATE_API_KEY' },
+                        { type: 'api', text: 'OPENAI_API_KEY (padrão)' },
+                        { type: 'variable', text: '<strong>weaviate_cluster_url</strong>: URL do cluster.' },
+                        { type: 'variable', text: '<strong>collection_name</strong>: Nome da coleção.' }
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> WeaviateVectorSearchTool\n\nweaviate_tool <span class="hl-keyword">=</span> <span class="hl-class">WeaviateVectorSearchTool</span>(\n    collection_name<span class="hl-keyword">=</span><span class="hl-string">'minha_colecao'</span>,\n    weaviate_cluster_url<span class="hl-keyword">=</span><span class="hl-string">"..."</span>,\n    weaviate_api_key<span class="hl-keyword">=</span><span class="hl-string">"..."</span>\n)`
+                }
+            ]
+        },
+        ia: {
+            title: "Ferramentas de IA e Machine Learning",
+            content: `<p class="mb-6">Estenda as capacidades dos agentes para interagir com serviços avançados de IA. Inclui geração de imagens (DALL-E), processamento de visão, execução de código e integração com LangChain e LlamaIndex.</p>`,
+            tools: [
+                 {
+                    name: 'Ferramenta DALL-E',
+                    importName: 'DallETool',
+                    description: 'Integra a capacidade de geração de imagens do modelo DALL-E da OpenAI diretamente nos agentes. Permite que os agentes gerem imagens a partir de descrições textuais, sendo valiosa para tarefas que envolvem a criação de conteúdo e visualização de conceitos.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'api', text: 'OPENAI_API_KEY' },
+                        { type: 'variable', text: '<strong>prompt</strong>: Descrição textual para a imagem.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> DallETool\n\ndalle_tool <span class="hl-keyword">=</span> <span class="hl-class">DallETool</span>()`
+                },
+                {
+                    name: 'Ferramenta de Visão',
+                    importName: 'VisionTool',
+                    description: 'Uma ferramenta especializada projetada para extrair texto de imagens. Capacita o agente a processar imagens, extrair o texto contido nelas e, em seguida, utilizar essa informação para gerar respostas, relatórios ou outras saídas relevantes.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'api', text: 'OPENAI_API_KEY' },
+                        { type: 'variable', text: '<strong>image_path_url</strong>: Caminho local ou URL da imagem.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> VisionTool\n\nvision_tool <span class="hl-keyword">=</span> <span class="hl-class">VisionTool</span>()`
+                },
+                 {
+                    name: 'Ferramenta AI Mind',
+                    importName: 'AIMindTool',
+                    description: 'Projetada para permitir a consulta de fontes de dados utilizando linguagem natural. Atua como um wrapper para os AI-Minds da MindsDB, possibilitando que os usuários interajam com dados em diversos bancos de dados (PostgreSQL, MySQL, Snowflake, etc.) fazendo perguntas.',
+                    details: [
+                        { type: 'dependency', text: "uv add minds-sdk" },
+                        { type: 'api', text: 'MINDS_API_KEY' },
+                        { type: 'variable', text: '<strong>datasources</strong>: Lista de dicionários descrevendo as fontes de dados.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> AIMindTool\n\naimind_tool <span class="hl-keyword">=</span> <span class="hl-class">AIMindTool</span>(\n    datasources<span class="hl-keyword">=</span>[\n        {\n            <span class="hl-string">"description"</span>: <span class="hl-string">"house sales data"</span>,\n            <span class="hl-string">"engine"</span>: <span class="hl-string">"postgres"</span>,\n            <span class="hl-comment"># ... connection_data</span>\n        }\n    ]\n)`
+                },
+                 {
+                    name: 'Ferramenta LlamaIndex',
+                    importName: 'LlamaIndexTool',
+                    description: 'Um wrapper projetado para integrar ferramentas e motores de consulta do LlamaIndex diretamente nos agentes CrewAI, permitindo que os fluxos de trabalho aproveitem as poderosas capacidades de processamento e recuperação de dados do LlamaIndex.',
+                    details: [
+                         { type: 'dependency', text: "Dependências do LlamaIndex" },
+                         { type: 'variable', text: 'Encapsula uma instância de ferramenta ou motor de consulta LlamaIndex.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> LlamaIndexTool\n<span class="hl-keyword">from</span> llama_index.core.tools <span class="hl-keyword">import</span> FunctionTool\n\n<span class="hl-keyword">def</span> <span class="hl-function">minha_funcao</span>(query: <span class="hl-class">str</span>) -> <span class="hl-class">str</span>:\n    <span class="hl-keyword">return</span> <span class="hl-string">f"Resultado para {query}"</span>\n\nllama_function_tool <span class="hl-keyword">=</span> <span class="hl-class">FunctionTool</span>.<span class="hl-function">from_defaults</span>(minha_funcao)\ncrewai_tool <span class="hl-keyword">=</span> <span class="hl-class">LlamaIndexTool</span>.<span class="hl-function">from_tool</span>(llama_function_tool)`
+                },
+                {
+                    name: 'Ferramenta LangChain',
+                    importName: 'LangChainTool',
+                    description: 'Serve como um wrapper para as ferramentas do LangChain, permitindo uma integração perfeita da vasta lista de ferramentas do LangChain com o CrewAI. Isso estende significativamente as capacidades dos agentes.',
+                    details: [
+                         { type: 'dependency', text: "Dependências do LangChain" },
+                         { type: 'variable', text: 'Encapsula uma instância de ferramenta LangChain.'}
+                    ],
+                    code: `<span class="hl-comment"># Exemplo conceitual</span>\n<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> LangChainTool\n<span class="hl-keyword">from</span> langchain_community.tools <span class="hl-keyword">import</span> DuckDuckGoSearchRun\n\nlangchain_tool <span class="hl-keyword">=</span> <span class="hl-class">DuckDuckGoSearchRun</span>()\ncrewai_tool <span class="hl-keyword">=</span> <span class="hl-class">LangChainTool</span>(langchain_tool<span class="hl-keyword">=</span>langchain_tool)`
+                },
+                {
+                    name: 'Ferramenta RAG',
+                    importName: 'RagTool',
+                    description: 'Uma ferramenta de base de conhecimento dinâmica, fundamental para a Geração Aumentada por Recuperação (RAG). Ela é projetada para responder a perguntas, aproveitando o poder do RAG através da integração com o EmbedChain, recuperando informações de diversas fontes de dados.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'variable', text: 'Use o método <strong>.add()</strong> para adicionar fontes de dados (arquivos, URLs, etc.).'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> RagTool\n\nrag_tool <span class="hl-keyword">=</span> <span class="hl-class">RagTool</span>()\nrag_tool.<span class="hl-function">add</span>(\n    data_type<span class="hl-keyword">=</span><span class="hl-string">"web_page"</span>,\n    url<span class="hl-keyword">=</span><span class="hl-string">"https://example.com"</span>\n)`
+                },
+                 {
+                    name: 'Ferramenta de Intérprete de Código',
+                    importName: 'CodeInterpreterTool',
+                    description: 'Uma ferramenta poderosa que permite aos agentes executar código Python 3 dentro de um ambiente seguro e isolado. Capacita os agentes a gerar código autonomamente, executá-lo, obter os resultados e utilizar essa informação para embasar decisões.',
+                    details: [
+                        { type: 'dependency', text: "pip install 'crewai[tools]'" },
+                        { type: 'dependency', text: "Docker (recomendado)" },
+                        { type: 'variable', text: '<strong>code</strong>: Código Python a ser executado.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> CodeInterpreterTool\n\ncode_interpreter <span class="hl-keyword">=</span> <span class="hl-class">CodeInterpreterTool</span>()`
+                }
+            ]
+        },
+        nuvem: {
+            title: "Ferramentas de Nuvem e Armazenamento",
+            content: `<p class="mb-6">Permita que agentes interajam com serviços de nuvem. Inclui acesso a armazenamento (Amazon S3) e plataformas de IA (Amazon Bedrock) para operações escaláveis.</p>`,
+            tools: [
+                 {
+                    name: 'Ferramenta de Leitura S3',
+                    importName: 'S3ReaderTool',
+                    description: 'Uma ferramenta fundamental que capacita os agentes a ler arquivos de buckets do Amazon S3. É crucial para fluxos de trabalho que exigem que os agentes acessem e recuperem conteúdo armazenado na nuvem da AWS.',
+                    details: [
+                        { type: 'dependency', text: 'uv add boto3' },
+                        { type: 'api', text: 'CREW_AWS_REGION' },
+                        { type: 'api', text: 'CREW_AWS_ACCESS_KEY_ID' },
+                        { type: 'api', text: 'CREW_AWS_SEC_ACCESS_KEY' },
+                        { type: 'variable', text: '<strong>file_path</strong>: Caminho do arquivo no formato s3://bucket/file.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools.aws.s3 <span class="hl-keyword">import</span> S3ReaderTool\n\ns3_reader <span class="hl-keyword">=</span> <span class="hl-class">S3ReaderTool</span>()`
+                },
+                {
+                    name: 'Ferramenta de Escrita S3',
+                    importName: 'S3WriterTool',
+                    description: 'Uma ferramenta essencial que permite aos agentes escrever conteúdo em arquivos dentro de buckets do Amazon S3. É extremamente útil para fluxos de trabalho que envolvem o armazenamento de dados e a persistência de conteúdo na AWS.',
+                    details: [
+                        { type: 'dependency', text: 'uv add boto3' },
+                        { type: 'api', text: 'Credenciais AWS (mesmas da leitura)' },
+                        { type: 'variable', text: '<strong>file_path</strong>: Caminho do arquivo de destino.'},
+                        { type: 'variable', text: '<strong>content</strong>: Conteúdo a ser escrito.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools.aws.s3 <span class="hl-keyword">import</span> S3WriterTool\n\ns3_writer <span class="hl-keyword">=</span> <span class="hl-class">S3WriterTool</span>()`
+                },
+                {
+                    name: 'Invocador de Agente Bedrock',
+                    importName: 'BedrockInvokeAgentTool',
+                    description: 'Permite que os agentes CrewAI interajam com os serviços de IA da Amazon Bedrock, invocando agentes Amazon Bedrock para executar tarefas impulsionadas por IA.',
+                    details: [
+                        { type: 'variable', text: "Detalhes de implementação não disponíveis no relatório fonte. Consulte a documentação oficial."}
+                    ],
+                    code: `<span class="hl-comment"># Exemplo de código não disponível.</span>`
+                },
+                {
+                    name: 'Recuperador de Base de Conhecimento Bedrock',
+                    importName: 'BedrockKBRetrieverTool',
+                    description: 'Uma ferramenta crucial que permite aos agentes recuperar informações de Bases de Conhecimento do Amazon Bedrock utilizando consultas em linguagem natural, permitindo o acesso a vastos repositórios de conhecimento proprietário.',
+                    details: [
+                        { type: 'dependency', text: 'uv add boto3' },
+                        { type: 'api', text: 'Credenciais AWS' },
+                        { type: 'variable', text: '<strong>knowledge_base_id</strong>: ID da base de conhecimento.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools.aws.bedrock <span class="hl-keyword">import</span> BedrockKBRetrieverTool\n\nbedrock_kb <span class="hl-keyword">=</span> <span class="hl-class">BedrockKBRetrieverTool</span>(knowledge_base_id<span class="hl-keyword">=</span><span class="hl-string">'seu-kb-id'</span>)`
+                }
+            ]
+        },
+        automacao: {
+            title: "Ferramentas de Automação e Integração",
+            content: `<p class="mb-6">Estenda as capacidades dos agentes para automatizar fluxos de trabalho e conectar-se a serviços externos como Apify (automação web), Composio (integração de apps) e MultiOn (navegação web).</p>`,
+            tools: [
+                 {
+                    name: 'Ferramenta Apify Actors',
+                    importName: 'ApifyActorsTool',
+                    description: 'Permite a integração de Apify Actors diretamente nos fluxos de trabalho da CrewAI, proporcionando aos agentes capacidades avançadas de web scraping, crawling, extração de dados e automação web a partir de mais de 4.000 Actors prontos.',
+                    details: [
+                        { type: 'dependency', text: "pip install langchain-apify" },
+                        { type: 'api', text: 'APIFY_API_TOKEN' },
+                        { type: 'variable', text: '<strong>actor_name</strong>: ID do Apify Actor a ser executado.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> ApifyActorsTool\n\napify_tool <span class="hl-keyword">=</span> <span class="hl-class">ApifyActorsTool</span>(actor_name<span class="hl-keyword">=</span><span class="hl-string">"apify/website-content-crawler"</span>)`
+                },
+                 {
+                    name: 'Ferramenta Composio',
+                    importName: 'ComposioTool',
+                    description: 'Habilita o uso de ferramentas Composio para permitir que os agentes CrewAI se integrem com centenas de aplicativos e serviços externos, transformando o raciocínio do agente em ações concretas em outras plataformas.',
+                    details: [
+                        { type: 'variable', text: "Detalhes de implementação não disponíveis no relatório fonte. Consulte a documentação oficial."}
+                    ],
+                    code: `<span class="hl-comment"># Exemplo de código não disponível.</span>`
+                },
+                {
+                    name: 'Ferramenta MultiOn',
+                    importName: 'MultiOnTool',
+                    description: 'Capacita os agentes CrewAI a navegar e interagir com a web utilizando instruções em linguagem natural. Ela encapsula as capacidades de navegação da MultiOn, facilitando a automação de tarefas complexas baseadas na web.',
+                    details: [
+                        { type: 'dependency', text: 'uv add multion' },
+                        { type: 'api', text: 'MULTION_API_KEY' },
+                        { type: 'variable', text: '<strong>cmd</strong>: Comando em linguagem natural para o navegador.'}
+                    ],
+                    code: `<span class="hl-keyword">from</span> crewai_tools <span class="hl-keyword">import</span> MultiOnTool\n\nmultion_tool <span class="hl-keyword">=</span> <span class="hl-class">MultiOnTool</span>()`
+                }
+            ]
+        },
+        custom: {
+            title: "Criação de Ferramentas Personalizadas",
+            content: `
+                <p class="mb-6">A CrewAI permite estender as capacidades dos agentes com ferramentas adaptadas às suas necessidades. Existem duas abordagens principais: subclassificar a classe <code class="bg-gray-200 text-sm p-1 rounded">BaseTool</code> ou usar o decorador <code class="bg-gray-200 text-sm p-1 rounded">@tool</code>.</p>
+                <h3 class="text-xl font-semibold mb-3">Subclassificação de BaseTool</h3>
+                <p class="mb-4">Ideal para ferramentas mais complexas, onde você define o nome, descrição, um esquema de argumentos (usando Pydantic) para validação de entrada e a lógica de execução no método <code class="bg-gray-200 text-sm p-1 rounded">_run</code>.</p>
+            `,
+            tools: [{
+                name: 'Exemplo com BaseTool',
+                importName: '',
+                description: '',
+                details: [],
+                code: `<span class="hl-keyword">from</span> typing <span class="hl-keyword">import</span> <span class="hl-class">Type</span>
+<span class="hl-keyword">from</span> crewai.tools <span class="hl-keyword">import</span> <span class="hl-class">BaseTool</span>
+<span class="hl-keyword">from</span> pydantic <span class="hl-keyword">import</span> <span class="hl-class">BaseModel</span>, <span class="hl-class">Field</span>
+
+<span class="hl-keyword">class</span> <span class="hl-class">MyToolInput</span>(<span class="hl-class">BaseModel</span>):
+    argument: <span class="hl-class">str</span> <span class="hl-keyword">=</span> <span class="hl-class">Field</span>(..., description<span class="hl-keyword">=</span><span class="hl-string">"Descrição do argumento."</span>)
+
+<span class="hl-keyword">class</span> <span class="hl-class">MyCustomTool</span>(<span class="hl-class">BaseTool</span>):
+    name: <span class="hl-class">str</span> <span class="hl-keyword">=</span> <span class="hl-string">"Nome da minha ferramenta"</span>
+    description: <span class="hl-class">str</span> <span class="hl-keyword">=</span> <span class="hl-string">"O que esta ferramenta faz."</span>
+    args_schema: <span class="hl-class">Type</span>[<span class="hl-class">BaseModel</span>] <span class="hl-keyword">=</span> MyToolInput
+
+    <span class="hl-keyword">def</span> <span class="hl-function">_run</span>(<span class="hl-keyword">self</span>, argument: <span class="hl-class">str</span>) -> <span class="hl-class">str</span>:
+        <span class="hl-keyword">return</span> <span class="hl-string">"Resultado da ferramenta"</span>`
+            }]
+        },
+        custom_decorator: {
+            title: "",
+            content: `
+                <h3 class="text-xl font-semibold mb-3 mt-8">Utilizando o Decorador @tool</h3>
+                <p class="mb-4">Uma alternativa mais concisa para funções simples. O nome da ferramenta é passado para o decorador e a docstring da função se torna a descrição que o agente usará para entender sua finalidade.</p>
+            `,
+             tools: [{
+                name: 'Exemplo com @tool',
+                importName: '',
+                description: '',
+                details: [],
+                code: `<span class="hl-keyword">from</span> crewai.tools <span class="hl-keyword">import</span> tool
+
+@<span class="hl-function">tool</span>(<span class="hl-string">"Minha Ferramenta Simples"</span>)
+<span class="hl-keyword">def</span> <span class="hl-function">my_simple_tool</span>(question: <span class="hl-class">str</span>) -> <span class="hl-class">str</span>:
+    <span class="hl-string">"""Esta docstring será a descrição da ferramenta."""</span>
+    <span class="hl-comment"># Lógica da ferramenta aqui</span>
+    <span class="hl-keyword">return</span> <span class="hl-string">"Saída da ferramenta"</span>`
+            }]
+        },
+        conclusion: {
+            title: "Conclusão",
+            content: `
+                <p class="mb-4 text-lg">O ecossistema de ferramentas da CrewAI é um componente estratégico para a construção de agentes de IA autônomos e capazes. A vasta biblioteca de ferramentas pré-construídas, combinada com a flexibilidade para integrações de terceiros e a criação de funcionalidades personalizadas, demonstra uma abordagem multifacetada.</p>
+                <p class="mb-4">A arquitetura da CrewAI, atuando como um orquestrador inteligente, permite que os agentes alavanquem serviços externos especializados, focando na inteligência colaborativa. A forte presença de ferramentas RAG sublinha a importância de acessar e extrair valor de repositórios de conhecimento, aumentando a confiabilidade das soluções.</p>
+                <p>Em suma, a CrewAI equipa agentes de IA para serem "fazedores" no mundo digital, oferecendo uma plataforma robusta para desenvolvedores que buscam construir soluções de IA autônomas, inteligentes e eficientes.</p>
+            `,
+            tools: []
+        },
+    };
+
+    const contentContainer = document.getElementById('content-container');
+    const navigation = document.getElementById('navigation');
+    let toolCardIdCounter = 0;
+
+    function renderContent(hash) {
+        const key = hash.substring(1) || 'introduction';
+        let dataKey = key;
+        if (key === 'custom_decorator') dataKey = 'custom'; 
+        
+        let sectionHtml = '';
+        
+        Object.keys(toolsData).forEach(dataKey => {
+            const sectionData = toolsData[dataKey];
+            const isVisible = dataKey === key || (key === 'custom' && (dataKey === 'custom' || dataKey === 'custom_decorator')) || (key ==='introduction' && dataKey ==='introduction');
+            
+            sectionHtml += `<div id="${dataKey}" class="content-section ${isVisible ? '' : 'hidden'}">`;
+            sectionHtml += `<h2 class="text-3xl sm:text-4xl font-bold mb-2">${sectionData.title}</h2>`;
+            sectionHtml += sectionData.content;
+
+            if (sectionData.tools && sectionData.tools.length > 0) {
+                sectionHtml += '<div class="space-y-4">';
+                sectionData.tools.forEach(tool => {
+                    toolCardIdCounter++;
+                    const cardId = `tool-card-${toolCardIdCounter}`;
+                    const detailsId = `tool-details-${toolCardIdCounter}`;
+                    const codeBlockId = `code-block-${toolCardIdCounter}`;
+
+                    sectionHtml += `
+                        <div class="tool-card">
+                            <button id="${cardId}" class="w-full text-left p-4 focus:outline-none">
+                                <div class="flex justify-between items-center">
+                                    <h4 class="text-lg font-semibold">${tool.name}</h4>
+                                    <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                            </button>
+                            <div class="tool-description">
+                                <p>${tool.description || `Importar como: <code class="bg-gray-200 text-xs p-1 rounded">${tool.importName}</code>`}</p>
+                            </div>
+                            <div id="${detailsId}" class="tool-details">
+                                <div class="p-4 border-t border-gray-200">
+                                    <div class="mb-4 space-y-2">
+                                        ${tool.details.map(detail => `<div class="tag ${'tag-' + detail.type}">${detail.text}</div>`).join('')}
+                                    </div>
+                                    <div class="code-block">
+                                        <button class="copy-btn" data-clipboard-target="#${codeBlockId}">Copiar</button>
+                                        <pre><code id="${codeBlockId}">${tool.code}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                sectionHtml += '</div>';
+            }
+             sectionHtml += `</div>`;
+        });
+
+        // Special handling for custom tools to appear under one nav link
+        if(key === 'custom') {
+            sectionHtml = `
+            <div id="custom" class="content-section">
+                ${toolsData.custom.title ? `<h2 class="text-3xl sm:text-4xl font-bold mb-2">${toolsData.custom.title}</h2>` : ''}
+                ${toolsData.custom.content}
+                ${generateToolsHtml(toolsData.custom.tools)}
+                
+                ${toolsData.custom_decorator.content}
+                ${generateToolsHtml(toolsData.custom_decorator.tools)}
+            </div>`;
+        } else {
+             const sectionData = toolsData[key];
+             sectionHtml = `
+             <div id="${key}" class="content-section">
+                <h2 class="text-3xl sm:text-4xl font-bold mb-2">${sectionData.title}</h2>
+                ${sectionData.content}
+                ${generateToolsHtml(sectionData.tools)}
+             </div>`;
+        }
+
+        contentContainer.innerHTML = sectionHtml;
+
+        if (key === 'introduction') {
+            renderChart();
+        }
+
+        // Update active link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${key}`) {
+                link.classList.add('active');
+            }
+        });
+
+        attachEventListeners();
+    }
+
+    function generateToolsHtml(tools) {
+        if (!tools || tools.length === 0) return '';
+        let html = '<div class="space-y-4">';
+        tools.forEach(tool => {
+            toolCardIdCounter++;
+            const cardId = `tool-card-${toolCardIdCounter}`;
+            const detailsId = `tool-details-${toolCardIdCounter}`;
+            const codeBlockId = `code-block-${toolCardIdCounter}`;
+            html += `
+                <div class="tool-card">
+                    <button id="${cardId}" class="w-full text-left p-4 focus:outline-none">
+                        <div class="flex justify-between items-center">
+                             <h4 class="text-lg font-semibold">${tool.name}</h4>
+                            <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </button>
+                    <div class="tool-description">
+                         <p>${tool.description || `Importar como: <code class="bg-gray-200 text-xs p-1 rounded">${tool.importName}</code>`}</p>
+                    </div>
+                    <div id="${detailsId}" class="tool-details">
+                        <div class="p-4 border-t border-gray-200">
+                            <div class="mb-4 space-y-2">
+                                ${tool.details.map(detail => `<div class="tag ${'tag-' + detail.type}">${detail.text}</div>`).join('')}
+                            </div>
+                            <div class="code-block">
+                                <button class="copy-btn" data-clipboard-target="#${codeBlockId}">Copiar</button>
+                                <pre><code id="${codeBlockId}">${tool.code}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        return html;
+    }
+
+
+    function attachEventListeners() {
+        document.querySelectorAll('[id^="tool-card-"]').forEach(button => {
+            button.addEventListener('click', () => {
+                const detailsId = button.id.replace('tool-card-', 'tool-details-');
+                const details = document.getElementById(detailsId);
+                const icon = button.querySelector('svg');
+
+                details.classList.toggle('open');
+                icon.classList.toggle('rotate-180');
+            });
+        });
+
+        document.querySelectorAll('.copy-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const targetSelector = button.getAttribute('data-clipboard-target');
+                const codeElement = document.querySelector(targetSelector);
+                if (codeElement) {
+                    const textToCopy = codeElement.innerText;
+                    
+                    const textArea = document.createElement('textarea');
+                    textArea.value = textToCopy;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        button.textContent = 'Copiado!';
+                        setTimeout(() => { button.textContent = 'Copiar'; }, 2000);
+                    } catch (err) {
+                        console.error('Falha ao copiar texto: ', err);
+                    }
+                    document.body.removeChild(textArea);
+                }
+            });
+        });
+    }
+
+    function renderChart() {
+        const ctx = document.getElementById('toolsChart').getContext('2d');
+        const chartData = {
+            labels: [
+                'Arquivo/Documento', 'Web Scraping', 'Busca/Pesquisa',
+                'Banco de Dados', 'IA/ML', 'Nuvem/Armazenamento', 'Automação'
+            ],
+            datasets: [{
+                label: 'Nº de Ferramentas',
+                data: [
+                    toolsData.arquivo.tools.length,
+                    toolsData.scraping.tools.length,
+                    toolsData.busca.tools.length,
+                    toolsData.dados.tools.length,
+                    toolsData.ia.tools.length,
+                    toolsData.nuvem.tools.length,
+                    toolsData.automacao.tools.length,
+                ],
+                backgroundColor: [
+                    '#8E9B8D', // Muted Teal
+                    '#B4A293', // Taupe
+                    '#D3C0B3', // Lighter Taupe
+                    '#C0A997', // Soft Brown
+                    '#A8B5A7', // Lighter Muted Teal
+                    '#E3D5C9', // Light Beige
+                    '#9E8C7E', // Darker Brown
+                ],
+                borderColor: '#FDFBF6',
+                borderWidth: 3
+            }]
+        };
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#4A4A4A',
+                            font: {
+                                size: 14,
+                                family: 'Inter'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        bodyFont: {
+                            size: 14,
+                            family: 'Inter'
+                        },
+                        titleFont: {
+                            size: 16,
+                             family: 'Inter'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    navigation.addEventListener('click', (e) => {
+        if (e.target.tagName === 'A') {
+            e.preventDefault();
+            const hash = new URL(e.target.href).hash;
+            window.location.hash = hash;
+            if (window.innerWidth < 768) { // md breakpoint
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            }
+        }
+    });
+    
+    window.addEventListener('hashchange', () => renderContent(window.location.hash));
+    
+    // Initial render
+    renderContent(window.location.hash || '#introduction');
+
+    // Mobile menu toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const sidebar = document.getElementById('sidebar');
+    mobileMenuButton.addEventListener('click', () => {
+        sidebar.classList.toggle('-translate-x-full');
+    });
+
+});
+</script>
+
+</body>
+</html>
