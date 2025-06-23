@@ -118,10 +118,32 @@ crew = crew_manager.create_crew_with_tasks(
 result = crew_manager.execute_crew("Crew de Pesquisa")
 ```
 
+## Persistência de Crews
+
+A partir da refatoração, **todas as informações de crews são armazenadas exclusivamente no banco de dados SQLite (`app/data/crews_database.db`)**. Não há mais leitura ou escrita de crews em arquivos JSON para persistência principal.
+
+- Criação, edição, exclusão e listagem de crews são feitas via banco de dados.
+- O arquivo `crews_db_resumido.json` pode ser gerado apenas para exportação/visualização, mas não é fonte de verdade.
+- Para exportar um resumo das crews para JSON, utilize a função utilitária disponível no sistema.
+
+## Estrutura Recomendada
+
+```text
+app/
+├── data/
+│   └── crews_database.db   # Banco de dados principal das crews
+├── crews/
+│   └── crew_manager.py     # Toda lógica de manipulação de crews
+```
+
+## Migração
+
+Se você utilizava arquivos JSON para crews, basta rodar o sistema normalmente: crews existentes serão migradas para o banco na primeira execução. Após a migração, remova arquivos JSON antigos para evitar confusão.
+
 ## Melhorias Futuras
 
 1. **Validação de Schema**: Validar YAML contra schemas
 2. **Configuração Dinâmica**: Interface para editar YAML
 3. **Templates**: Templates de crews pré-definidas
 4. **Monitoramento**: Logs e métricas de execução
-5. **Cache**: Cache de configurações para performance 
+5. **Cache**: Cache de configurações para performance

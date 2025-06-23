@@ -8,6 +8,7 @@ web_search_tool:
     max_results: Número máximo de resultados
   returns: Lista de resultados com links e resumos
   example: web_search_tool('NBR 6118 concreto armado', 10)
+  api_env: OPENAI_API_KEY
 pdf_document_reader:
   name: Leitor de Documentos PDF
   description: Lê e extrai informações de PDFs de normas ABNT, NBR e documentos técnicos
@@ -26,6 +27,7 @@ patent_database_tool:
     patent_office: Escritório de patentes (INPI, USPTO, etc.)
   returns: Lista de patentes encontradas com detalhes
   example: patent_database_tool('concreto sustentável', 'INPI')
+  api_env: PATENT_API_KEY
 news_innovation_feed:
   name: Feed de Notícias e Inovações
   description: Monitora notícias e inovações no setor da construção civil
@@ -35,6 +37,7 @@ news_innovation_feed:
     time_period: Período de tempo (dias)
   returns: Lista de notícias e inovações relevantes
   example: news_innovation_feed('construção sustentável', 30)
+  api_env: NEWS_API_KEY
 excel_csv_parser:
   name: Parser de Excel/CSV
   description: Lê, manipula e extrai dados de planilhas Excel e CSV
@@ -72,6 +75,7 @@ database_query_tool:
     database_connection: Configuração de conexão
   returns: Resultados da consulta
   example: database_query_tool('SELECT * FROM projetos WHERE status = "ativo"')
+  api_env: DB_API_KEY
 document_generation_tool:
   name: Ferramenta de Geração de Documentos
   description: Gera documentos em formatos como Word (.docx) ou PDF

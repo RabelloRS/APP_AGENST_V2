@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ferramentas e Chaves de API - Documentação</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+        }
+        h3 {
+            color: #2c3e50;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        .tool-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #3498db;
+        }
+        .tool-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        .api-key {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin: 5px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .warning {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #0c5460;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #155724;
+        }
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .category {
+            background: #e8f4fd;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .category h3 {
+            color: #2980b9;
+            margin-top: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .step {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 10px 15px;
+            margin: 10px 0;
+        }
+        .step-number {
+            font-weight: bold;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Ferramentas e Chaves de API - Guia Completo</h1>
+        
+        <div class="info">
+            <strong>📋 Sobre este guia:</strong> Este documento lista todas as ferramentas disponíveis no sistema CrewAI e suas respectivas chaves de API necessárias para funcionamento.
+        </div>
+
+        <h2>⚠️ Aviso Importante</h2>
+        <div class="warning">
+            <strong>Segurança das Chaves de API:</strong>
+            <ul>
+                <li>Nunca compartilhe suas chaves de API em código público</li>
+                <li>Use variáveis de ambiente para armazenar chaves</li>
+                <li>Configure as chaves antes de executar workflows que as utilizem</li>
+                <li>Algumas ferramentas têm custos associados ao uso</li>
+            </ul>
+        </div>
+
+        <h2>🚀 Como Configurar Chaves de API</h2>
+        <div class="step">
+            <span class="step-number">1.</span> Obtenha a chave de API no site oficial do serviço
+        </div>
+        <div class="step">
+            <span class="step-number">2.</span> Configure como variável de ambiente:
+            <div class="code-block">
+# Windows (PowerShell)
+$env:CHAVE_API="sua_chave_aqui"
+
+# Linux/Mac
+export CHAVE_API="sua_chave_aqui"
+
+# Python
+import os
+os.environ['CHAVE_API'] = 'sua_chave_aqui'
+            </div>
+        </div>
+        <div class="step">
+            <span class="step-number">3.</span> Ou configure no código (não recomendado para produção):
+            <div class="code-block">
+import os
+os.environ['CHAVE_API'] = 'sua_chave_aqui'
+            </div>
+        </div>
+
+        <h2>🔍 Ferramentas de Busca e Pesquisa</h2>
+        <div class="category">
+            <h3>🔎 Motores de Busca</h3>
+            
+            <div class="tool-card">
+                <div class="tool-name">SerperDevTool</div>
+                <p>Ferramenta de busca web avançada com resultados estruturados</p>
+                <div class="api-key">Variável de Ambiente: <strong>SERPER_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://serper.dev" target="_blank">Serper.dev</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">EXASearchTool</div>
+                <p>Busca semântica e pesquisa avançada de conteúdo</p>
+                <div class="api-key">Variável de Ambiente: <strong>EXA_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://exa.ai" target="_blank">Exa.ai</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">serpapi_tool</div>
+                <p>Interface para o Google Search e outros motores de busca</p>
+                <div class="api-key">Variável de Ambiente: <strong>SERPAPI_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://serpapi.com" target="_blank">SerpApi</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">serply_api_tool</div>
+                <p>API de busca web com resultados em tempo real</p>
+                <div class="api-key">Variável de Ambiente: <strong>SERPLY_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://serply.io" target="_blank">Serply</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">LinkupSearchTool</div>
+                <p>Busca especializada em vagas de emprego e oportunidades</p>
+                <div class="api-key">Variável de Ambiente: <strong>LINKUP_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://linkup.com" target="_blank">LinkUp</a></p>
+            </div>
+        </div>
+
+        <h2>🌐 Ferramentas de Web Scraping e Navegação</h2>
+        <div class="category">
+            <h3>🕷️ Scraping e Automação Web</h3>
+            
+            <div class="tool-card">
+                <div class="tool-name">BrowserbaseLoadTool</div>
+                <p>Carregamento e renderização de páginas web</p>
+                <div class="api-key">Variável de Ambiente: <strong>BROWSERBASE_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://browserbase.com" target="_blank">Browserbase</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">ScrapflyScrapeWebsiteTool</div>
+                <p>Scraping avançado de websites com anti-detecção</p>
+                <div class="api-key">Variável de Ambiente: <strong>SCRAPFLY_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://scrapfly.io" target="_blank">Scrapfly</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">spider_tool</div>
+                <p>Ferramenta de crawling e extração de dados web</p>
+                <div class="api-key">Variável de Ambiente: <strong>SPIDER_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://spider.cloud" target="_blank">Spider</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">Ferramentas Firecrawl (todas)</div>
+                <p>Conjunto de ferramentas para crawling e extração de dados</p>
+                <div class="api-key">Variável de Ambiente: <strong>FIRECRAWL_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://firecrawl.dev" target="_blank">Firecrawl</a></p>
+            </div>
+        </div>
+
+        <h2>🤖 Ferramentas de IA e Machine Learning</h2>
+        <div class="category">
+            <h3>🧠 Inteligência Artificial</h3>
+            
+            <div class="tool-card">
+                <div class="tool-name">AIMindTool</div>
+                <p>Ferramenta de IA para análise e processamento de dados</p>
+                <div class="api-key">Variável de Ambiente: <strong>MINDSDB_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://mindsdb.com" target="_blank">MindsDB</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">Ferramentas Patronus (todas)</div>
+                <p>Conjunto de ferramentas de IA para automação e análise</p>
+                <div class="api-key">Variável de Ambiente: <strong>PATRONUS_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://patronus.ai" target="_blank">Patronus AI</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">CrewaiEnterpriseTools</div>
+                <p>Ferramentas avançadas do CrewAI Enterprise</p>
+                <div class="api-key">Variável de Ambiente: <strong>CREWAI_ENTERPRISE_TOKEN</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://crewai.com" target="_blank">CrewAI Enterprise</a></p>
+            </div>
+        </div>
+
+        <h2>🗄️ Ferramentas de Banco de Dados e Armazenamento</h2>
+        <div class="category">
+            <h3>💾 Bancos de Dados e Vector Stores</h3>
+            
+            <div class="tool-card">
+                <div class="tool-name">DatabricksQueryTool</div>
+                <p>Execução de queries em clusters Databricks</p>
+                <div class="api-key">Variável de Ambiente: <strong>DATABRICKS_TOKEN</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://databricks.com" target="_blank">Databricks</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">QdrantVectorSearchTool</div>
+                <p>Busca vetorial e armazenamento de embeddings</p>
+                <div class="api-key">Variável de Ambiente: <strong>QDRANT_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://qdrant.tech" target="_blank">Qdrant</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">WeaviateVectorSearchTool</div>
+                <p>Banco de dados vetorial para busca semântica</p>
+                <div class="api-key">Variável de Ambiente: <strong>WEAVIATE_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://weaviate.io" target="_blank">Weaviate</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">SnowflakeSearchTool</div>
+                <p>Consulta e busca em data warehouses Snowflake</p>
+                <div class="api-key">Credenciais: <strong>SNOWFLAKE_USER</strong>, <strong>SNOWFLAKE_PASSWORD</strong> ou <strong>SNOWFLAKE_PRIVATE_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://snowflake.com" target="_blank">Snowflake</a></p>
+            </div>
+        </div>
+
+        <h2>🔗 Ferramentas de Integração e Automação</h2>
+        <div class="category">
+            <h3>⚙️ Automação e Workflows</h3>
+            
+            <div class="tool-card">
+                <div class="tool-name">ApifyActorsTool</div>
+                <p>Execução de atores e automações na plataforma Apify</p>
+                <div class="api-key">Variável de Ambiente: <strong>APIFY_API_TOKEN</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://apify.com" target="_blank">Apify</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">ComposioToolSet</div>
+                <p>Conjunto de ferramentas para integração de APIs</p>
+                <div class="api-key">Variável de Ambiente: <strong>COMPOSIO_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://composio.dev" target="_blank">Composio</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">MultiOnTool</div>
+                <p>Automação de tarefas web e navegação inteligente</p>
+                <div class="api-key">Variável de Ambiente: <strong>MULTION_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://multion.ai" target="_blank">MultiOn</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">zapier_action_tool</div>
+                <p>Execução de ações e automações no Zapier</p>
+                <div class="api-key">Variável de Ambiente: <strong>ZAPIER_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://zapier.com" target="_blank">Zapier</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">stagehand_tool</div>
+                <p>Ferramenta de automação e orquestração de workflows</p>
+                <div class="api-key">Variável de Ambiente: <strong>STAGEHAND_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://stagehand.ai" target="_blank">Stagehand</a></p>
+            </div>
+        </div>
+
+        <h2>📚 Ferramentas de Documentação e Código</h2>
+        <div class="category">
+            <h3>💻 Desenvolvimento e Documentação</h3>
+            
+            <div class="tool-card">
+                <div class="tool-name">GithubSearchTool</div>
+                <p>Busca em repositórios e código do GitHub</p>
+                <div class="api-key">Variável de Ambiente: <strong>GITHUB_PAT</strong> (Personal Access Token)</div>
+                <p><strong>Serviço:</strong> <a href="https://github.com" target="_blank">GitHub</a></p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">Ferramentas Tavily (ambas)</div>
+                <p>Busca avançada e pesquisa em documentos</p>
+                <div class="api-key">Variável de Ambiente: <strong>TAVILY_API_KEY</strong></div>
+                <p><strong>Serviço:</strong> <a href="https://tavily.com" target="_blank">Tavily</a></p>
+            </div>
+        </div>
+
+        <h2>✅ Ferramentas Customizadas (Sem API)</h2>
+        <div class="success">
+            <h3>🎉 Ferramentas que não precisam de chaves de API:</h3>
+            <ul>
+                <li><strong>simple_research_tool</strong> - Pesquisa simples</li>
+                <li><strong>read_excel_file</strong> - Leitura de arquivos Excel</li>
+                <li><strong>read_excel_column</strong> - Leitura de colunas específicas</li>
+                <li><strong>compare_text_similarity</strong> - Comparação de similaridade</li>
+                <li><strong>analyze_excel_similarity</strong> - Análise de similaridade entre planilhas</li>
+                <li><strong>detect_data_patterns</strong> - Detecção de padrões em dados</li>
+                <li><strong>generate_excel_report</strong> - Geração de relatórios</li>
+                <li><strong>validate_excel_file</strong> - Validação de arquivos Excel</li>
+                <li><strong>crew_performance_analyzer</strong> - Análise de performance de crews</li>
+                <li><strong>agent_output_quality_checker</strong> - Verificação de qualidade de saída</li>
+                <li><strong>tool_usage_evaluator</strong> - Avaliação de uso de ferramentas</li>
+                <li><strong>workflow_efficiency_analyzer</strong> - Análise de eficiência de workflows</li>
+                <li><strong>recommendation_generator</strong> - Geração de recomendações</li>
+                <li><strong>execution_summary_builder</strong> - Construção de resumos de execução</li>
+            </ul>
+        </div>
+
+        <h2>📋 Resumo das Chaves de API</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ferramenta</th>
+                    <th>Variável de Ambiente</th>
+                    <th>Serviço</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>SerperDevTool</td><td>SERPER_API_KEY</td><td>Serper.dev</td></tr>
+                <tr><td>EXASearchTool</td><td>EXA_API_KEY</td><td>Exa.ai</td></tr>
+                <tr><td>serpapi_tool</td><td>SERPAPI_API_KEY</td><td>SerpApi</td></tr>
+                <tr><td>serply_api_tool</td><td>SERPLY_API_KEY</td><td>Serply</td></tr>
+                <tr><td>LinkupSearchTool</td><td>LINKUP_API_KEY</td><td>LinkUp</td></tr>
+                <tr><td>BrowserbaseLoadTool</td><td>BROWSERBASE_API_KEY</td><td>Browserbase</td></tr>
+                <tr><td>ScrapflyScrapeWebsiteTool</td><td>SCRAPFLY_API_KEY</td><td>Scrapfly</td></tr>
+                <tr><td>spider_tool</td><td>SPIDER_API_KEY</td><td>Spider</td></tr>
+                <tr><td>Ferramentas Firecrawl</td><td>FIRECRAWL_API_KEY</td><td>Firecrawl</td></tr>
+                <tr><td>AIMindTool</td><td>MINDSDB_API_KEY</td><td>MindsDB</td></tr>
+                <tr><td>Ferramentas Patronus</td><td>PATRONUS_API_KEY</td><td>Patronus AI</td></tr>
+                <tr><td>CrewaiEnterpriseTools</td><td>CREWAI_ENTERPRISE_TOKEN</td><td>CrewAI Enterprise</td></tr>
+                <tr><td>DatabricksQueryTool</td><td>DATABRICKS_TOKEN</td><td>Databricks</td></tr>
+                <tr><td>QdrantVectorSearchTool</td><td>QDRANT_API_KEY</td><td>Qdrant</td></tr>
+                <tr><td>WeaviateVectorSearchTool</td><td>WEAVIATE_API_KEY</td><td>Weaviate</td></tr>
+                <tr><td>SnowflakeSearchTool</td><td>SNOWFLAKE_USER/PASSWORD/PRIVATE_KEY</td><td>Snowflake</td></tr>
+                <tr><td>ApifyActorsTool</td><td>APIFY_API_TOKEN</td><td>Apify</td></tr>
+                <tr><td>ComposioToolSet</td><td>COMPOSIO_API_KEY</td><td>Composio</td></tr>
+                <tr><td>MultiOnTool</td><td>MULTION_API_KEY</td><td>MultiOn</td></tr>
+                <tr><td>zapier_action_tool</td><td>ZAPIER_API_KEY</td><td>Zapier</td></tr>
+                <tr><td>stagehand_tool</td><td>STAGEHAND_API_KEY</td><td>Stagehand</td></tr>
+                <tr><td>GithubSearchTool</td><td>GITHUB_PAT</td><td>GitHub</td></tr>
+                <tr><td>Ferramentas Tavily</td><td>TAVILY_API_KEY</td><td>Tavily</td></tr>
+            </tbody>
+        </table>
+
+        <h2>💡 Dicas de Uso</h2>
+        <div class="info">
+            <h3>🔧 Configuração Recomendada:</h3>
+            <ol>
+                <li>Crie um arquivo <code>.env</code> no diretório do projeto</li>
+                <li>Adicione suas chaves de API no formato: <code>CHAVE_API=sua_chave_aqui</code></li>
+                <li>Use a biblioteca <code>python-dotenv</code> para carregar as variáveis</li>
+                <li>Nunca commite o arquivo <code>.env</code> no controle de versão</li>
+            </ol>
+        </div>
+
+        <div class="warning">
+            <h3>⚠️ Custos e Limitações:</h3>
+            <ul>
+                <li>Muitas dessas ferramentas têm custos por uso ou por mês</li>
+                <li>Verifique os preços e limites antes de usar em produção</li>
+                <li>Algumas ferramentas oferecem planos gratuitos com limitações</li>
+                <li>Monitore o uso para evitar cobranças inesperadas</li>
+            </ul>
+        </div>
+
+        <div class="success">
+            <h3>🎯 Recomendação:</h3>
+            <p>Para começar, use as <strong>ferramentas customizadas</strong> que não precisam de API. Elas são suficientes para a maioria dos casos de uso e não têm custos associados.</p>
+        </div>
+    </div>
+</body>
+</html> 

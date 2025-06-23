@@ -3,9 +3,8 @@ Gerenciador de agentes para o sistema
 """
 
 import os
-from typing import Dict, List, Optional, Any
-from pydantic import BaseModel, create_model, Field
-from typing import Type, Callable
+from typing import Dict, List, Optional, Type, Callable
+from pydantic import BaseModel, Field
 
 import yaml
 from crewai import Agent
@@ -14,33 +13,6 @@ from crewai.tools import BaseTool  # Corrigido: importa BaseTool do CrewAI
 
 class GenericArgsSchema(BaseModel):
     argumento: str = Field(..., description="Argumento genérico para a ferramenta.")
-
-
-class CustomTool(BaseTool):  # Corrigido: herda da BaseTool do CrewAI
-    """Classe personalizada para tools compatível com CrewAI (padrão CrewAI)"""
-    name: str = "Custom Tool"
-    description: str = "Tool customizada compatível com CrewAI"
-    args_schema: Type[BaseModel] = GenericArgsSchema
-
-    def __init__(self, func: Callable, name: str = None, description: str = None, args_schema: Type[BaseModel] = None):
-        super().__init__()
-        self._func = func
-        if name:
-            self.name = name
-        if description:
-            self.description = description
-        if args_schema:
-            self.args_schema = args_schema
-
-    @property
-    def _type(self):
-        return "tool"
-
-    def _run(self, **kwargs):
-        try:
-            return self._func(**kwargs)
-        except Exception as e:
-            return f"Erro ao executar tool {self.name}: {str(e)}"
 
 
 class AgentManager:
@@ -153,20 +125,18 @@ class AgentManager:
 
     def _create_tool_objects(self, tool_names: List[str]) -> List[BaseTool]:
         """Cria objetos Tool compatíveis com CrewAI (prioriza nativas, fallback para customizadas)"""
-        print(f"🔧 Debug: Tentando criar {len(tool_names)} tool objects")
-        
         if not self.tools_manager:
             print("❌ ToolsManager não configurado")
             return []
 
         import re
+
         def camel_to_snake(name):
             s1 = re.sub(r'(.)([A-Z][a-z]+)', r'\1_\2', name)
             return re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
         tools = []
         for tool_name in tool_names:
-            print(f"🔧 Criando tool '{tool_name}'...")
             tool_instance = None
             # 1. Tenta importar ferramenta nativa do crewai_tools pelo nome
             try:
@@ -175,24 +145,18 @@ class AgentManager:
                 tool_module = importlib.import_module(module_name)
                 tool_class = getattr(tool_module, tool_name)
                 tool_instance = tool_class()
-                print(f"✅ Tool nativa '{tool_name}' importada do crewai_tools")
-            except Exception as e:
-                print(f"⚠️ Tool '{tool_name}' não encontrada no crewai_tools ({e}), tentando customizada...")
-                # 2. Fallback: ferramenta customizada
+            except Exception:
+                # 2. Fallback: ferramenta customizada - usar como função simples
                 tool_function = self.tools_manager.get_tool_function(tool_name)
-                tool_info = self.tools_manager.get_tool_info(tool_name)
-                if tool_function and tool_info:
-                    tool_instance = CustomTool(
-                        name=tool_name,
-                        description=tool_info.get("description", f"Tool {tool_name}"),
-                        func=tool_function
-                    )
-                    print(f"✅ Tool customizada '{tool_name}' criada")
+                if tool_function:
+                    # Para ferramentas customizadas, vamos usar uma abordagem mais simples
+                    # ou pular se não conseguirmos criar uma tool válida
+                    print(f"⚠️ Tool customizada '{tool_name}' disponível como função, mas não como tool CrewAI")
+                    continue
                 else:
-                    print(f"❌ Tool '{tool_name}' não encontrada nem como nativa nem como customizada")
+                    print(f"⚠️ Tool '{tool_name}' não encontrada")
                     continue
             tools.append(tool_instance)
-        print(f"✅ Total de {len(tools)} tools criadas com sucesso")
         return tools
 
     def reload_configs(self) -> bool:
@@ -208,60 +172,40 @@ class AgentManager:
     def create_agent(
         self, agent_type: str, tools: Optional[list] = None, **kwargs
     ) -> Optional[Agent]:
-        """Cria um novo agente do tipo especificado"""
-        print(f"🔍 Debug: Tentando criar agente '{agent_type}'")
-        
-        if agent_type not in self.available_agents:
-            print(f"❌ Tipo de agente '{agent_type}' não encontrado nas configurações")
-            print(f"🔍 Agentes disponíveis: {list(self.available_agents.keys())}")
-            return None
-
-        agent_config = self.available_agents[agent_type].copy()
-        print(f"✅ Configuração do agente carregada: {agent_config.get('name', agent_type)}")
-
-        # Sobrescrever configurações padrão com kwargs
-        agent_config.update(kwargs)
-
-        # Usar tools fornecidos ou da configuração
-        if tools is not None:
-            print(f"🔧 Tools fornecidos explicitamente: {tools}")
-            # Se tools fornecidos são strings, converter para objetos Tool
-            if tools and isinstance(tools[0], str):
-                tool_objects = self._create_tool_objects(tools)
-            else:
-                tool_objects = tools
-        else:
-            # Usar tools configuradas para este agente
-            agent_tools_config = self.agent_tools.get(agent_type, {})
-            tool_names = agent_tools_config.get("tools", [])
-            print(f"🔧 Tools configuradas para '{agent_type}': {tool_names}")
-            tool_objects = self._create_tool_objects(tool_names)
-
-        print(f"🔧 Tool objects criados: {len(tool_objects)} tools")
-
+        """Cria um agente do tipo especificado"""
         try:
-            print(f"🔧 Criando objeto Agent com role: {agent_config['role']}")
+            if agent_type not in self.available_agents:
+                print(f"Tipo de agente '{agent_type}' não encontrado")
+                return None
+
+            agent_config = self.available_agents[agent_type]
+
+            # Obter tools do agente se não especificadas
+            if tools is None:
+                agent_tools_config = self.agent_tools.get(agent_type, {})
+                tool_names = agent_tools_config.get("tools", [])
+                tools = self._create_tool_objects(tool_names)
+
+            # Criar agente
             agent = Agent(
-                role=agent_config["role"],
-                goal=agent_config["goal"],
-                backstory=agent_config["backstory"],
-                tools=tool_objects,
+                role=agent_config.get("role", ""),
+                goal=agent_config.get("goal", ""),
+                backstory=agent_config.get("backstory", ""),
+                tools=tools,
                 verbose=agent_config.get("verbose", True),
                 allow_delegation=agent_config.get("allow_delegation", False),
+                **kwargs
             )
 
             self.agents[agent_type] = agent
-            print(f"✅ Agente '{agent_type}' criado com sucesso!")
             return agent
 
         except Exception as e:
-            print(f"❌ Erro ao criar agente {agent_type}: {e}")
-            import traceback
-            traceback.print_exc()
+            print(f"Erro ao criar agente {agent_type}: {e}")
             return None
 
     def get_agent(self, agent_type: str) -> Optional[Agent]:
-        """Retorna um agente existente"""
+        """Retorna um agente específico"""
         return self.agents.get(agent_type)
 
     def get_all_agents(self) -> Dict[str, Agent]:
@@ -273,32 +217,25 @@ class AgentManager:
         return list(self.available_agents.keys())
 
     def get_agent_info(self, agent_type: str) -> Optional[Dict]:
-        """Retorna informações sobre um tipo de agente"""
+        """Retorna informações de um agente específico"""
         return self.available_agents.get(agent_type)
 
     def get_agent_configs(self) -> Dict:
         """Retorna todas as configurações de agentes"""
-        return self.available_agents.copy()
+        return self.available_agents
 
     def get_agent_tools(self, agent_type: str) -> List[str]:
-        """Retorna as tools atribuídas a um agente específico"""
-        agent_tools_config = self.agent_tools.get(agent_type, {})
-        return agent_tools_config.get("tools", [])
+        """Retorna as tools de um agente específico (agora só do agents.yaml)"""
+        agent_config = self.available_agents.get(agent_type, {})
+        return agent_config.get("tools", [])
 
     def update_agent_tools(self, agent_type: str, tools: List[str]) -> bool:
-        """Atualiza as tools atribuídas a um agente"""
+        """Atualiza as tools de um agente específico"""
         try:
-            if agent_type not in self.available_agents:
-                print(f"Tipo de agente '{agent_type}' não encontrado")
-                return False
-
-            # Atualizar configuração na memória
             if agent_type not in self.agent_tools:
-                self.agent_tools[agent_type] = {}
+                self.agent_tools[agent_type] = {"tools": [], "description": ""}
 
             self.agent_tools[agent_type]["tools"] = tools
-
-            # Salvar no arquivo YAML
             return self._save_agent_tools_to_file()
 
         except Exception as e:
@@ -308,14 +245,6 @@ class AgentManager:
     def _save_agent_tools_to_file(self) -> bool:
         """Salva as configurações de tools dos agentes no arquivo YAML"""
         try:
-            # Criar backup do arquivo original
-            backup_path = f"{self.tools_config_path}.backup"
-            if os.path.exists(self.tools_config_path):
-                import shutil
-
-                shutil.copy2(self.tools_config_path, backup_path)
-
-            # Salvar nova configuração
             with open(self.tools_config_path, "w", encoding="utf-8") as file:
                 yaml.dump(
                     self.agent_tools,
@@ -324,27 +253,19 @@ class AgentManager:
                     allow_unicode=True,
                     sort_keys=False,
                 )
-
-            print(
-                f"Configurações de tools dos agentes salvas com sucesso em {self.tools_config_path}"
-            )
             return True
-
         except Exception as e:
             print(f"Erro ao salvar configurações de tools dos agentes: {e}")
             return False
 
     def update_agent_config(self, agent_type: str, new_config: Dict) -> bool:
-        """Atualiza a configuração de um agente e salva no arquivo YAML"""
+        """Atualiza a configuração de um agente específico"""
         try:
             if agent_type not in self.available_agents:
                 print(f"Tipo de agente '{agent_type}' não encontrado")
                 return False
 
-            # Atualizar configuração na memória
             self.available_agents[agent_type].update(new_config)
-
-            # Salvar no arquivo YAML
             return self._save_configs_to_file()
 
         except Exception as e:
@@ -352,16 +273,8 @@ class AgentManager:
             return False
 
     def _save_configs_to_file(self) -> bool:
-        """Salva as configurações atuais no arquivo YAML"""
+        """Salva as configurações dos agentes no arquivo YAML"""
         try:
-            # Criar backup do arquivo original
-            backup_path = f"{self.config_path}.backup"
-            if os.path.exists(self.config_path):
-                import shutil
-
-                shutil.copy2(self.config_path, backup_path)
-
-            # Salvar nova configuração
             with open(self.config_path, "w", encoding="utf-8") as file:
                 yaml.dump(
                     self.available_agents,
@@ -370,12 +283,9 @@ class AgentManager:
                     allow_unicode=True,
                     sort_keys=False,
                 )
-
-            print(f"Configurações salvas com sucesso em {self.config_path}")
             return True
-
         except Exception as e:
-            print(f"Erro ao salvar configurações: {e}")
+            print(f"Erro ao salvar configurações dos agentes: {e}")
             return False
 
     def rename_agent(self, old_type: str, new_type: str) -> bool:
@@ -389,22 +299,23 @@ class AgentManager:
                 print(f"Tipo de agente '{new_type}' já existe")
                 return False
 
-            # Mover configuração para novo nome
+            # Mover configuração
             self.available_agents[new_type] = self.available_agents.pop(old_type)
 
-            # Mover configuração de tools
+            # Mover tools se existir
             if old_type in self.agent_tools:
                 self.agent_tools[new_type] = self.agent_tools.pop(old_type)
 
-            # Atualizar agentes criados
+            # Mover agente criado se existir
             if old_type in self.agents:
                 self.agents[new_type] = self.agents.pop(old_type)
 
-            # Salvar no arquivo
-            success1 = self._save_configs_to_file()
-            success2 = self._save_agent_tools_to_file()
-            return success1 and success2
+            # Salvar alterações
+            self._save_configs_to_file()
+            self._save_agent_tools_to_file()
+
+            return True
 
         except Exception as e:
-            print(f"Erro ao renomear agente: {e}")
+            print(f"Erro ao renomear agente {old_type} para {new_type}: {e}")
             return False

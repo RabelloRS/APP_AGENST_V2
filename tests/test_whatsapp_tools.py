@@ -1,5 +1,5 @@
 """
-Testes para as ferramentas do WhatsApp
+Testes úteis para funções utilitárias do WhatsApp (apenas lógica relevante)
 """
 
 import pytest
@@ -20,7 +20,7 @@ from app.utils.tools import (
 
 
 class TestWhatsAppTools:
-    """Testes para as ferramentas do WhatsApp"""
+    """Testes para funções utilitárias do WhatsApp (apenas lógica útil)"""
 
     def test_whatsapp_connect(self):
         """Testa a conexão com WhatsApp"""
@@ -193,4 +193,4 @@ class TestWhatsAppTools:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__]) 
+    pytest.main([__file__])

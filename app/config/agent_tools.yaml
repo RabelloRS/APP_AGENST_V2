@@ -1,38 +1,35 @@
-technical_researcher:
+researcher:
   tools:
-  - website_search
-  description: Ferramentas para pesquisa e coleta de informações.
-data_analyst:
+  - simple_research_tool
+  - read_excel_file
+  - compare_text_similarity
+  description: Tools para pesquisa e coleta de informações
+analyst:
   tools:
   - analyze_excel_similarity
   - detect_data_patterns
   - generate_excel_report
-  description: Ferramentas para análise avançada e geração de relatórios.
-technical_writer:
+  description: Tools para análise avançada e geração de relatórios
+writer:
   tools:
   - generate_excel_report
-  description: Ferramentas para geração e formatação de conteúdo técnico.
-technical_reviewer:
+  description: Tools para geração de conteúdo e relatórios
+reviewer:
   tools:
   - validate_excel_file
   - detect_data_patterns
-  description: Ferramentas para validação, revisão de dados e conformidade.
-technical_coordinator:
+  description: Tools para validação e revisão de dados
+coordinator:
   tools:
   - read_excel_file
-  - execution_summary_builder
-  description: Ferramentas para coordenação e sumarização.
-crewai_evaluator:
+  - validate_excel_file
+  description: Tools básicas para coordenação
+excel_analyst:
   tools:
-  - crew_performance_analyzer
-  - agent_output_quality_checker
-  - tool_usage_evaluator
-  - workflow_efficiency_analyzer
-  - recommendation_generator
-  - execution_summary_builder
-  description: Ferramentas especializadas para avaliação abrangente de crews.
-simple_evaluator:
-  tools:
-  - crew_performance_analyzer
-  - execution_summary_builder
-  description: Ferramentas básicas para avaliação de fallback.
+  - read_excel_column
+  - read_excel_file
+  - analyze_excel_similarity
+  - detect_data_patterns
+  - generate_excel_report
+  - validate_excel_file
+  description: Todas as tools relacionadas a análise de Excel

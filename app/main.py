@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 
 import streamlit as st
+import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
 from app.agents.agent_manager import AgentManager
@@ -22,42 +23,51 @@ from app.pages.crews import show_crews_tab
 from app.pages.whatsapp import show_whatsapp_tab
 from app.pages.execution import show_execution_tab
 from app.pages.help import main as show_help_tab
+from app.pages.workflow_builder import show_workflow_builder
+from app.pages.about import show_about
+
 
 def show_help_tools_explorer():
     import streamlit as st
     from app.pages.help import read_html_file
     st.title("Explorador de Ferramentas CrewAI")
-    st.components.v1.html(read_html_file("crewai_tools_explorer.html"), height=900, scrolling=True)
+    components.html(read_html_file("crewai_tools_explorer.html"), height=900, scrolling=True)
+
 
 def show_help_agent_task():
     import streamlit as st
     from app.pages.help import read_html_file
     st.title("CrewAI: Orquestração de Agentes de IA")
-    st.components.v1.html(read_html_file("crewai_agent_task.html"), height=900, scrolling=True)
+    components.html(read_html_file("crewai_agent_task.html"), height=900, scrolling=True)
+
 
 def show_help_tools_v2():
     import streamlit as st
     from app.pages.help import read_html_file
     st.title("CrewAI Tools v2 (Novidades)")
-    st.components.v1.html(read_html_file("crewai_tools_v2.html"), height=900, scrolling=True)
+    components.html(read_html_file("crewai_tools_v2.html"), height=900, scrolling=True)
+
 
 def show_help_v3():
     import streamlit as st
     from app.pages.help import read_html_file
     st.title("CrewAI v3 (Visão Geral)")
-    st.components.v1.html(read_html_file("crewai_v3.html"), height=900, scrolling=True)
+    components.html(read_html_file("crewai_v3.html"), height=900, scrolling=True)
+
 
 def show_help_structures_summary():
     import streamlit as st
     from app.pages.help import read_html_file
     st.title("Resumo Estrutural Rápido")
-    st.components.v1.html(read_html_file("crewai_structures_summary.html"), height=900, scrolling=True)
+    components.html(read_html_file("crewai_structures_summary.html"), height=900, scrolling=True)
+
 
 def show_help_tabela_tools():
     import streamlit as st
     from app.pages.help import read_html_file
     st.title("Tabela Interativa de Ferramentas CrewAI")
-    st.components.v1.html(read_html_file("tabela_tools.html"), height=900, scrolling=True)
+    components.html(read_html_file("tabela_tools.html"), height=900, scrolling=True)
+
 
 # Carregar variáveis de ambiente
 env_path = Path(__file__).resolve().parent.parent / ".env"
@@ -71,6 +81,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+
 def inicializar_gerenciadores():
     """Inicializa os gerenciadores no session_state se não existirem."""
     if "agent_manager" not in st.session_state:
@@ -79,14 +90,15 @@ def inicializar_gerenciadores():
         st.session_state.task_manager = TaskManager()
     if "tools_manager" not in st.session_state:
         st.session_state.tools_manager = ToolsManager()
-    
+
     # IMPORTANTE: Configurar o ToolsManager no AgentManager ANTES de criar o CrewManager
     st.session_state.agent_manager.set_tools_manager(st.session_state.tools_manager)
-    
+
     if "crew_manager" not in st.session_state:
         st.session_state.crew_manager = CrewManager(
             st.session_state.agent_manager, st.session_state.task_manager
         )
+
 
 def main():
     """Função principal da aplicação"""
@@ -127,11 +139,11 @@ def main():
         st.success("✅ API configurada")
 
         # Configurações do modelo
-        model = st.selectbox(
+        st.selectbox(
             "Modelo", ["gpt-4.1", "gpt-4", "gpt-3.5-turbo", "gpt-4-turbo"], index=0
         )
 
-        temperature = st.slider(
+        st.slider(
             "Temperatura", min_value=0.0, max_value=2.0, value=0.7, step=0.1
         )
 
@@ -167,13 +179,17 @@ def main():
             st.Page(show_tools_tab, title="Tools", icon="🔧"),
             st.Page(show_crews_tab, title="Crews", icon="👥"),
         ],
-        "📱 Integrações": [
-            st.Page(show_whatsapp_tab, title="WhatsApp", icon="📱"),
+        "🧩 Workflows": [
+            st.Page(show_workflow_builder, title="Construtor de Workflows", icon="🧩"),
         ],
         "📊 Execução": [
             st.Page(show_execution_tab, title="Execução", icon="📊"),
         ],
+        "📱 Integrações": [
+            st.Page(show_whatsapp_tab, title="WhatsApp", icon="📱"),
+        ],
         "❓ Ajuda": [
+            st.Page(show_about, title="Sobre o Sistema", icon="ℹ️"),
             st.Page(show_help_tools_explorer, title="Explorador de Ferramentas", icon="🛠️"),
             st.Page(show_help_agent_task, title="Orquestração de Agentes", icon="🧑‍💻"),
             st.Page(show_help_tools_v2, title="Tools v2 (Novidades)", icon="✨"),
@@ -186,9 +202,10 @@ def main():
 
     # Usar st.navigation com posição no topo para melhor organização
     current_page = st.navigation(pages, position="top", expanded=True)
-    
+
     # Executar a página selecionada
     current_page.run()
+
 
 if __name__ == "__main__":
     main()

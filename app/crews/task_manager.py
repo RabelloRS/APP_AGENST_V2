@@ -54,9 +54,7 @@ class TaskManager:
 
         try:
             task = Task(
-                description=task_config["description"],
-                expected_output=task_config["expected_output"],
-                agent=agent
+                description=task_config["description"], expected_output=task_config["expected_output"], agent=agent
             )
 
             self.tasks[task_type] = task
@@ -66,13 +64,11 @@ class TaskManager:
             print(f"Erro ao criar tarefa {task_type}: {e}")
             return None
 
-    def create_task_with_params(
-        self, task_type: str, agent, **params
-    ) -> Optional[Task]:
+    def create_task_with_params(self, task_type: str, agent, **params) -> Optional[Task]:
         """Cria uma tarefa substituindo parâmetros na descrição"""
         try:
             print(f"🔧 Debug: Criando tarefa '{task_type}' para agente '{getattr(agent, 'role', 'Unknown')}'")
-            
+
             if task_type not in self.available_tasks:
                 print(f"❌ Tipo de tarefa '{task_type}' não encontrado nas configurações")
                 print(f"   Tarefas disponíveis: {list(self.available_tasks.keys())}")
@@ -89,12 +85,10 @@ class TaskManager:
             task_config["description"] = description
 
             print(f"🔧 Debug: Criando objeto Task com descrição: {description[:50]}...")
-            
+
             # Criar tarefa usando a sintaxe correta do CrewAI
             task = Task(
-                description=task_config["description"],
-                expected_output=task_config["expected_output"],
-                agent=agent
+                description=task_config["description"], expected_output=task_config["expected_output"], agent=agent
             )
 
             print(f"✅ Tarefa '{task_type}' criada com sucesso!")
@@ -104,6 +98,7 @@ class TaskManager:
             print(f"❌ Erro ao criar tarefa {task_type}: {e}")
             print(f"   Tipo de erro: {type(e).__name__}")
             import traceback
+
             traceback.print_exc()
             return None
 

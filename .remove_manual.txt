@@ -1,0 +1,11 @@
+Remova manualmente os seguintes arquivos para padronizar a estrutura:
+
+app/config/agent_tools.yaml
+app/config/agent_tools.yaml.backup
+app/config/crews.yaml
+app/config/tools.yaml.backup
+app/config/agents.yaml.backup
+app/config/__init__.py
+app/crews/__init__.py
+app/crews/__pycache__/
+app/config/__pycache__/

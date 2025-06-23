@@ -337,4 +337,57 @@ graph TD
 
 **Última Atualização**: 21/06/2025  
 **Versão do Sistema**: 2.0.0  
-**Status Geral**: ✅ **FUNCIONANDO** (80% completo) 
+**Status Geral**: ✅ **FUNCIONANDO** (80% completo)
+
+# Estrutura do Projeto
+
+## app/config/
+- `agents.yaml`: Lista e configura todos os agentes do sistema.
+- `tasks.yaml`: Lista e configura todas as tasks disponíveis.
+- `tools.yaml`: (Opcional) Apenas informativo, descreve ferramentas oficiais.
+
+## app/crews_db.json
+- Banco de crews geradas pelo workflow builder. Cada crew contém nome, descrição, tasks e código Python gerado.
+
+## app/pages/
+- `agents.py`: Interface de gestão de agentes.
+- `workflow_builder.py`: Interface de criação de crews.
+
+## app/agents/
+- `agent_manager.py`: Lógica de gestão de agentes.
+
+## app/crews/
+- `crew_manager.py`, `task_manager.py`: Lógica de crews e tasks (se necessário).
+
+## .env
+- Variáveis de ambiente/API keys para ferramentas externas.
+
+## docs/
+- Documentação e guias do projeto.
+
+## Persistência de Crews
+
+A partir da refatoração, **todas as informações de crews são armazenadas exclusivamente no banco de dados SQLite (`app/data/crews_database.db`)**. Não há mais leitura ou escrita de crews em arquivos JSON para persistência principal.
+
+- Criação, edição, exclusão e listagem de crews são feitas via banco de dados.
+- O arquivo `crews_db_resumido.json` pode ser gerado apenas para exportação/visualização, mas não é fonte de verdade.
+- Para exportar um resumo das crews para JSON, utilize a função utilitária disponível no sistema.
+
+## Estrutura Recomendada
+
+```text
+app/
+├── data/
+│   └── crews_database.db   # Banco de dados principal das crews
+├── crews/
+│   └── crew_manager.py     # Toda lógica de manipulação de crews
+```
+
+## Migração
+
+Se você utilizava arquivos JSON para crews, basta rodar o sistema normalmente: crews existentes serão migradas para o banco na primeira execução. Após a migração, remova arquivos JSON antigos para evitar confusão.
+
+## Regras Gerais
+- Não use arquivos obsoletos ou duplicados.
+- Centralize toda configuração nos arquivos acima.
+- Remova arquivos de cache e scripts antigos não utilizados.

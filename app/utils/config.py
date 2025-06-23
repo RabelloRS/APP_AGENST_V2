@@ -33,9 +33,7 @@ class Config:
 
     def is_api_configured(self) -> bool:
         """Verifica se as APIs estão configuradas"""
-        return bool(
-            self.openai_api_key and self.openai_api_key != "your_openai_api_key_here"
-        )
+        return bool(self.openai_api_key and self.openai_api_key != "your_openai_api_key_here")
 
     def get_openai_config(self) -> dict:
         """Retorna configuração para OpenAI"""

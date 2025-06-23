@@ -117,4 +117,53 @@ Para atualizar o projeto:
 ```bash
 git pull origin main
 pip install -r requirements.txt --upgrade
-``` 
+```
+
+# Plataforma de Gestão de Agentes, Tasks e Crews para Engenharia
+
+## Estrutura dos Arquivos
+
+- `app/config/agents.yaml`: Definição dos agentes, categorias, papéis e ferramentas.
+- `app/config/tasks.yaml`: Definição das tasks disponíveis.
+- `app/data/crews_database.db`: Banco de dados principal das crews (persistência única).
+- `app/config/tools.yaml`: (Opcional) Descrição informativa das ferramentas.
+- `.env`: Variáveis de ambiente/API keys necessárias para ferramentas externas.
+
+## Fluxo de Gestão
+
+- **Agentes:** Gerenciados via `agents.yaml` e interface `agents.py`.
+- **Tasks:** Gerenciadas via `tasks.yaml`.
+- **Crews:** Criadas, salvas, editadas e listadas exclusivamente via banco de dados SQLite (`app/data/crews_database.db`).
+- **Ferramentas:** Apenas as oficiais do CrewAI, configuradas via `.env`.
+
+## Recomendações
+
+- Sempre edite agentes, tasks e crews pelas interfaces ou diretamente nos arquivos de configuração YAML.
+- Mantenha a documentação enxuta e centralizada.
+- Remova arquivos obsoletos para evitar confusão.
+
+## Ajuda
+
+Consulte `docs/PROJECT_STRUCTURE.md` para detalhes sobre cada arquivo e boas práticas de manutenção.
+
+## 🔄 Persistência de Crews
+
+A partir da versão 2.0.0, **todas as informações de crews são armazenadas exclusivamente no banco de dados SQLite (`app/data/crews_database.db`)**. Não há mais leitura ou escrita de crews em arquivos JSON para persistência principal.
+
+- Criação, edição, exclusão e listagem de crews são feitas via banco de dados.
+- O arquivo `crews_db_resumido.json` pode ser gerado apenas para exportação/visualização, mas não é fonte de verdade.
+- Para exportar um resumo das crews para JSON, utilize a função utilitária disponível no sistema.
+
+## 🗂️ Estrutura Recomendada
+
+```text
+app/
+├── data/
+│   └── crews_database.db   # Banco de dados principal das crews
+├── crews/
+│   └── crew_manager.py     # Toda lógica de manipulação de crews
+```
+
+## 🛠️ Migração
+
+Se você utilizava arquivos JSON para crews, basta rodar o sistema normalmente: crews existentes serão migradas para o banco na primeira execução. Após a migração, remova arquivos JSON antigos para evitar confusão.

@@ -7,18 +7,27 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 
-from app.utils.tools import (analyze_excel_similarity, compare_text_similarity,
-                             detect_common_prefixes, detect_common_suffixes,
-                             detect_data_patterns, detect_outliers,
-                             generate_excel_report,
-                             generate_similarity_recommendations,
-                             read_excel_column, read_excel_file,
-                             validate_excel_file,
-                             simple_research_tool,
-                             # Ferramentas de avaliação
-                             crew_performance_analyzer, agent_output_quality_checker,
-                             tool_usage_evaluator, workflow_efficiency_analyzer,
-                             recommendation_generator, execution_summary_builder)
+from app.utils.tools import (
+    analyze_excel_similarity,
+    compare_text_similarity,
+    detect_common_prefixes,
+    detect_common_suffixes,
+    detect_data_patterns,
+    detect_outliers,
+    generate_excel_report,
+    generate_similarity_recommendations,
+    read_excel_column,
+    read_excel_file,
+    validate_excel_file,
+    simple_research_tool,
+    # Ferramentas de avaliação
+    crew_performance_analyzer,
+    agent_output_quality_checker,
+    tool_usage_evaluator,
+    workflow_efficiency_analyzer,
+    recommendation_generator,
+    execution_summary_builder,
+)
 
 
 class ToolsManager:
@@ -108,9 +117,7 @@ class ToolsManager:
                 "name": "Gerar Relatório Excel",
                 "description": "Gera um relatório estruturado baseado nos resultados de análise",
                 "category": "Relatórios",
-                "parameters": {
-                    "analysis_results": "Resultados da análise (dicionário)"
-                },
+                "parameters": {"analysis_results": "Resultados da análise (dicionário)"},
                 "returns": "Relatório formatado em texto",
                 "example": "generate_excel_report(resultados_analise)",
             },
@@ -161,7 +168,6 @@ class ToolsManager:
             "generate_excel_report": generate_excel_report,
             "validate_excel_file": validate_excel_file,
             "simple_research_tool": simple_research_tool,
-            
             # Ferramentas de avaliação de crews
             "crew_performance_analyzer": crew_performance_analyzer,
             "agent_output_quality_checker": agent_output_quality_checker,
@@ -183,7 +189,7 @@ class ToolsManager:
                     "category": "Não categorizada",
                 }
                 config_changed = True
-        
+
         if config_changed:
             print("💾 Salvando configuração de ferramentas atualizada...")
             self._save_configs_to_file()
@@ -224,6 +230,7 @@ class ToolsManager:
         """Tenta importar e retornar a classe de uma tool nativa do crewai_tools pelo nome exato."""
         try:
             import importlib
+
             module_name = f"crewai_tools.tools.{tool_name.lower()}"
             tool_module = importlib.import_module(module_name)
             tool_class = getattr(tool_module, tool_name)

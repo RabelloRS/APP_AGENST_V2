@@ -9,14 +9,18 @@ HELP_TITLES = {
     "crewai_agent_task.html": "CrewAI: Orquestração de Agentes de IA",
     "crewai_tools_v2.html": "CrewAI Tools v2 (Novidades)",
     "crewai_v3.html": "CrewAI v3 (Visão Geral)",
+    "ferramentas_api_keys.html": "🔑 Ferramentas e Chaves de API - Guia Completo",
 }
+
 
 def list_html_files():
     return [f for f in os.listdir(HELP_DIR) if f.endswith(".html")]
 
+
 def read_html_file(filename):
     with open(os.path.join(HELP_DIR, filename), "r", encoding="utf-8") as f:
         return f.read()
+
 
 def main():
     st.title("Documentação de Ajuda")
@@ -32,6 +36,7 @@ def main():
         selected = html_files[options.index(selected_label)]
         html_content = read_html_file(selected)
         st.components.v1.html(html_content, height=900, scrolling=True)
+
 
 if __name__ == "__main__":
     main()

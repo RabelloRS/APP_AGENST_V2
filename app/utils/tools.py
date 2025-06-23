@@ -17,9 +17,7 @@ def read_excel_column(file_path: str, column_name: str) -> list:
     try:
         df = pd.read_excel(file_path)
         if column_name not in df.columns:
-            raise ValueError(
-                f"Coluna '{column_name}' não encontrada. Colunas disponíveis: {list(df.columns)}"
-            )
+            raise ValueError(f"Coluna '{column_name}' não encontrada. Colunas disponíveis: {list(df.columns)}")
         return df[column_name].astype(str).tolist()
     except Exception as e:
         raise Exception(f"Erro ao ler arquivo Excel: {str(e)}")
@@ -34,9 +32,7 @@ def read_excel_file(file_path: str) -> Dict[str, Any]:
             "rows": len(df),
             "data_types": df.dtypes.astype(str).to_dict(),
             "sample_data": df.head(5).to_dict("records"),
-            "summary_stats": df.describe().to_dict()
-            if df.select_dtypes(include=[np.number]).shape[1] > 0
-            else {},
+            "summary_stats": df.describe().to_dict() if df.select_dtypes(include=[np.number]).shape[1] > 0 else {},
         }
     except Exception as e:
         raise Exception(f"Erro ao ler arquivo Excel: {str(e)}")
@@ -46,16 +42,12 @@ def compare_text_similarity(list1: list, list2: list) -> dict:
     """Compara similaridade de textos entre duas listas."""
     matches = {}
     for text in list1:
-        best_match, score = process.extractOne(
-            text, list2, scorer=fuzz.token_sort_ratio
-        )
+        best_match, score = process.extractOne(text, list2, scorer=fuzz.token_sort_ratio)
         matches[text] = {"match": best_match, "score": score}
     return matches
 
 
-def analyze_excel_similarity(
-    file1_path: str, file2_path: str, column1: str, column2: str
-) -> Dict[str, Any]:
+def analyze_excel_similarity(file1_path: str, file2_path: str, column1: str, column2: str) -> Dict[str, Any]:
     """Análise completa de similaridade entre duas planilhas."""
     try:
         # Ler as colunas
@@ -107,9 +99,7 @@ def generate_similarity_recommendations(scores: List[float]) -> List[str]:
     total_items = len(scores)
 
     if avg_score >= 85:
-        recommendations.append(
-            "✅ Alta similaridade geral - os dados são muito similares"
-        )
+        recommendations.append("✅ Alta similaridade geral - os dados são muito similares")
     elif avg_score >= 70:
         recommendations.append("⚠️ Similaridade moderada - verificar inconsistências")
     else:
@@ -228,7 +218,7 @@ def validate_excel_file(file_path: str) -> Dict[str, Any]:
     """Valida um arquivo Excel e retorna informações sobre sua estrutura."""
     try:
         df = pd.read_excel(file_path)
-        
+
         validation = {
             "is_valid": True,
             "file_path": file_path,
@@ -241,7 +231,7 @@ def validate_excel_file(file_path: str) -> Dict[str, Any]:
             "duplicate_rows": df.duplicated().sum(),
             "memory_usage_mb": round(df.memory_usage(deep=True).sum() / (1024 * 1024), 2),
         }
-        
+
         # Verificar problemas comuns
         issues = []
         if df.empty:
@@ -250,18 +240,14 @@ def validate_excel_file(file_path: str) -> Dict[str, Any]:
             issues.append("Mais de 50% dos dados são nulos")
         if df.duplicated().sum() > len(df) * 0.1:
             issues.append("Mais de 10% das linhas são duplicadas")
-            
+
         validation["issues"] = issues
         validation["has_issues"] = len(issues) > 0
-        
+
         return validation
-        
+
     except Exception as e:
-        return {
-            "is_valid": False,
-            "error": str(e),
-            "file_path": file_path
-        }
+        return {"is_valid": False, "error": str(e), "file_path": file_path}
 
 
 # ============================================================================
@@ -274,19 +260,15 @@ def whatsapp_connect(session_name: str) -> Dict[str, Any]:
     try:
         # Implementação simulada para demonstração
         # Em produção, você precisaria usar selenium ou uma biblioteca específica
-        
+
         return {
             "status": "connected",
             "session_name": session_name,
-            "message": "WhatsApp Web conectado (simulação). Em produção, use selenium."
+            "message": "WhatsApp Web conectado (simulação). Em produção, use selenium.",
         }
-        
+
     except Exception as e:
-        return {
-            "status": "error",
-            "session_name": session_name,
-            "error": str(e)
-        }
+        return {"status": "error", "session_name": session_name, "error": str(e)}
 
 
 def whatsapp_get_messages(group_name: str, limit: int = 100) -> List[Dict[str, Any]]:
@@ -295,22 +277,24 @@ def whatsapp_get_messages(group_name: str, limit: int = 100) -> List[Dict[str, A
         # Esta é uma implementação simulada
         # Em produção, você precisaria usar uma biblioteca como python-whatsapp-sdk
         # ou selenium para interagir com o WhatsApp Web
-        
+
         messages = []
         # Simular mensagens para demonstração
         for i in range(min(limit, 10)):
-            messages.append({
-                "id": f"msg_{i}",
-                "text": f"Mensagem de exemplo {i}",
-                "timestamp": datetime.now().isoformat(),
-                "sender": f"Usuário {i % 3}",
-                "has_file": i % 3 == 0,
-                "file_name": f"arquivo_{i}.pdf" if i % 3 == 0 else None,
-                "file_url": f"https://drive.google.com/file/d/example_{i}" if i % 3 == 0 else None
-            })
-        
+            messages.append(
+                {
+                    "id": f"msg_{i}",
+                    "text": f"Mensagem de exemplo {i}",
+                    "timestamp": datetime.now().isoformat(),
+                    "sender": f"Usuário {i % 3}",
+                    "has_file": i % 3 == 0,
+                    "file_name": f"arquivo_{i}.pdf" if i % 3 == 0 else None,
+                    "file_url": f"https://drive.google.com/file/d/example_{i}" if i % 3 == 0 else None,
+                }
+            )
+
         return messages
-        
+
     except Exception as e:
         raise Exception(f"Erro ao obter mensagens: {str(e)}")
 
@@ -318,7 +302,7 @@ def whatsapp_get_messages(group_name: str, limit: int = 100) -> List[Dict[str, A
 def extract_cloud_links(messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Extrai links de serviços em nuvem das mensagens."""
     cloud_links = []
-    
+
     # Padrões para diferentes serviços de nuvem
     patterns = {
         "google_drive": r"https://drive\.google\.com/file/d/([a-zA-Z0-9_-]+)",
@@ -326,23 +310,25 @@ def extract_cloud_links(messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         "onedrive": r"https://1drv\.ms/[a-zA-Z0-9_-]+",
         "dropbox": r"https://www\.dropbox\.com/[a-zA-Z0-9_-]+",
         "mega": r"https://mega\.nz/[a-zA-Z0-9_-]+",
-        "mediafire": r"https://www\.mediafire\.com/[a-zA-Z0-9_-]+"
+        "mediafire": r"https://www\.mediafire\.com/[a-zA-Z0-9_-]+",
     }
-    
+
     for message in messages:
         text = message.get("text", "")
-        
+
         for service, pattern in patterns.items():
             matches = re.findall(pattern, text)
             for match in matches:
-                cloud_links.append({
-                    "message_id": message.get("id"),
-                    "service": service,
-                    "url": match if service == "google_drive" else text,
-                    "timestamp": message.get("timestamp"),
-                    "sender": message.get("sender")
-                })
-    
+                cloud_links.append(
+                    {
+                        "message_id": message.get("id"),
+                        "service": service,
+                        "url": match if service == "google_drive" else text,
+                        "timestamp": message.get("timestamp"),
+                        "sender": message.get("sender"),
+                    }
+                )
+
     return cloud_links
 
 
@@ -351,54 +337,47 @@ def download_cloud_file(cloud_link: str, output_path: str) -> Dict[str, Any]:
     try:
         # Criar diretório se não existir
         Path(output_path).mkdir(parents=True, exist_ok=True)
-        
+
         # Extrair nome do arquivo da URL
         parsed_url = urlparse(cloud_link)
-        
+
         if "drive.google.com" in cloud_link:
             # Google Drive
-            file_id = parse_qs(parsed_url.query).get('id', [None])[0]
+            file_id = parse_qs(parsed_url.query).get("id", [None])[0]
             if not file_id:
                 # Tentar extrair do path
-                path_parts = parsed_url.path.split('/')
+                path_parts = parsed_url.path.split("/")
                 file_id = path_parts[-1] if path_parts else None
-            
+
             if file_id:
                 download_url = f"https://drive.google.com/uc?export=download&id={file_id}"
                 response = requests.get(download_url, stream=True)
-                
+
                 # Tentar obter nome do arquivo do header
-                filename = response.headers.get('content-disposition', '')
-                if 'filename=' in filename:
-                    filename = filename.split('filename=')[1].strip('"')
+                filename = response.headers.get("content-disposition", "")
+                if "filename=" in filename:
+                    filename = filename.split("filename=")[1].strip('"')
                 else:
                     filename = f"google_drive_file_{file_id}"
-                
+
                 file_path = os.path.join(output_path, filename)
-                
-                with open(file_path, 'wb') as f:
+
+                with open(file_path, "wb") as f:
                     for chunk in response.iter_content(chunk_size=8192):
                         f.write(chunk)
-                
+
                 return {
                     "status": "success",
                     "file_path": file_path,
                     "file_size": os.path.getsize(file_path),
-                    "source": "google_drive"
+                    "source": "google_drive",
                 }
-        
+
         # Para outros serviços, implementar conforme necessário
-        return {
-            "status": "not_implemented",
-            "message": f"Download para {parsed_url.netloc} não implementado ainda"
-        }
-        
+        return {"status": "not_implemented", "message": f"Download para {parsed_url.netloc} não implementado ainda"}
+
     except Exception as e:
-        return {
-            "status": "error",
-            "error": str(e),
-            "cloud_link": cloud_link
-        }
+        return {"status": "error", "error": str(e), "cloud_link": cloud_link}
 
 
 def download_whatsapp_file(message: Dict[str, Any], output_path: str) -> Dict[str, Any]:
@@ -406,38 +385,31 @@ def download_whatsapp_file(message: Dict[str, Any], output_path: str) -> Dict[st
     try:
         # Criar diretório se não existir
         Path(output_path).mkdir(parents=True, exist_ok=True)
-        
+
         if not message.get("has_file"):
-            return {
-                "status": "no_file",
-                "message": "Mensagem não contém arquivo"
-            }
-        
+            return {"status": "no_file", "message": "Mensagem não contém arquivo"}
+
         # Em produção, você precisaria implementar a lógica real de download
         # do WhatsApp Web usando selenium ou uma biblioteca específica
-        
+
         # Simulação para demonstração
         filename = message.get("file_name", "arquivo_whatsapp")
         file_path = os.path.join(output_path, filename)
-        
+
         # Criar arquivo de exemplo
-        with open(file_path, 'w') as f:
+        with open(file_path, "w") as f:
             f.write(f"Arquivo baixado do WhatsApp - {message.get('timestamp')}")
-        
+
         return {
             "status": "success",
             "file_path": file_path,
             "file_size": os.path.getsize(file_path),
             "source": "whatsapp",
-            "original_message": message.get("id")
+            "original_message": message.get("id"),
         }
-        
+
     except Exception as e:
-        return {
-            "status": "error",
-            "error": str(e),
-            "message_id": message.get("id")
-        }
+        return {"status": "error", "error": str(e), "message_id": message.get("id")}
 
 
 def rename_file_with_timestamp(file_path: str, timestamp: str) -> str:
@@ -445,26 +417,26 @@ def rename_file_with_timestamp(file_path: str, timestamp: str) -> str:
     try:
         # Converter timestamp para formato de data/hora
         if isinstance(timestamp, str):
-            dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+            dt = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
         else:
             dt = timestamp
-        
+
         # Formatar data/hora
         timestamp_str = dt.strftime("%Y%m%d_%H%M%S")
-        
+
         # Obter extensão do arquivo
         file_ext = Path(file_path).suffix
         file_name = Path(file_path).stem
-        
+
         # Criar novo nome
         new_name = f"{timestamp_str}_{file_name}{file_ext}"
         new_path = Path(file_path).parent / new_name
-        
+
         # Renomear arquivo
         Path(file_path).rename(new_path)
-        
+
         return str(new_path)
-        
+
     except Exception as e:
         raise Exception(f"Erro ao renomear arquivo: {str(e)}")
 
@@ -473,45 +445,37 @@ def organize_files_by_date(files_list: List[Dict[str, Any]], base_path: str) -> 
     """Organiza arquivos em pastas por data de download."""
     try:
         organized_files = {}
-        
+
         for file_info in files_list:
             file_path = file_info.get("file_path")
             timestamp = file_info.get("timestamp")
-            
+
             if not file_path or not timestamp:
                 continue
 
             # Converter timestamp para data
             if isinstance(timestamp, str):
-                dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                dt = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
             else:
                 dt = timestamp
-            
+
             # Criar pasta por data
             date_folder = dt.strftime("%Y-%m-%d")
             folder_path = Path(base_path) / date_folder
             folder_path.mkdir(parents=True, exist_ok=True)
-            
+
             # Mover arquivo para pasta
             file_name = Path(file_path).name
             new_file_path = folder_path / file_name
-            
+
             if Path(file_path).exists():
                 Path(file_path).rename(new_file_path)
                 organized_files[file_path] = str(new_file_path)
 
-        return {
-            "status": "success",
-            "organized_files": organized_files,
-            "base_path": base_path
-        }
-        
+        return {"status": "success", "organized_files": organized_files, "base_path": base_path}
+
     except Exception as e:
-        return {
-            "status": "error",
-            "error": str(e),
-            "files_list": files_list
-        }
+        return {"status": "error", "error": str(e), "files_list": files_list}
 
 
 def simple_research_tool(topic: str) -> str:
@@ -545,24 +509,23 @@ def simple_research_tool(topic: str) -> str:
 
 # === FERRAMENTAS DE AVALIAÇÃO DE CREWS ===
 
-def crew_performance_analyzer(
-    execution_data: dict, performance_metrics: Optional[list] = None
-) -> str:
+
+def crew_performance_analyzer(execution_data: dict, performance_metrics: Optional[list] = None) -> str:
     """
     Analisa a performance geral da crew, tempo de execução, qualidade das entregas e colaboração entre agentes
     """
     try:
         if performance_metrics is None:
-            performance_metrics = ['efficiency', 'quality', 'collaboration', 'completeness']
-        
+            performance_metrics = ["efficiency", "quality", "collaboration", "completeness"]
+
         analysis = {
-            'execution_time': execution_data.get('duration', 'N/A'),
-            'status': execution_data.get('status', 'unknown'),
-            'agents_count': execution_data.get('agents_count', 0),
-            'tasks_count': execution_data.get('tasks_count', 0),
-            'success_rate': 'N/A'
+            "execution_time": execution_data.get("duration", "N/A"),
+            "status": execution_data.get("status", "unknown"),
+            "agents_count": execution_data.get("agents_count", 0),
+            "tasks_count": execution_data.get("tasks_count", 0),
+            "success_rate": "N/A",
         }
-        
+
         report = f"""
 === ANÁLISE DE PERFORMANCE DA CREW ===
 
@@ -581,29 +544,28 @@ def crew_performance_analyzer(
 • Completude das Tarefas: {'100%' if analysis['status'] == 'completed' else 'Incompleto'}
 • Uso de Recursos: {'Otimizado' if analysis['execution_time'] else 'A analisar'}
         """
-        
+
         return report.strip()
-        
+
     except Exception as e:
         return f"Erro na análise de performance da crew: {str(e)}"
 
-def agent_output_quality_checker(
-    agent_outputs: dict, quality_criteria: Optional[list] = None
-) -> str:
+
+def agent_output_quality_checker(agent_outputs: dict, quality_criteria: Optional[list] = None) -> str:
     """
     Avalia a qualidade, completude e relevância dos outputs produzidos por cada agente individualmente
     """
     try:
         if quality_criteria is None:
-            quality_criteria = ['relevance', 'completeness', 'accuracy', 'clarity']
-        
+            quality_criteria = ["relevance", "completeness", "accuracy", "clarity"]
+
         analysis_report = "=== ANÁLISE DE QUALIDADE DOS OUTPUTS DOS AGENTES ===\n\n"
-        
+
         for agent_name, output in agent_outputs.items():
             output_length = len(str(output)) if output else 0
-            
+
             quality_score = min(100, max(10, output_length / 10))  # Score básico baseado no tamanho
-            
+
             analysis_report += f"""
 🤖 AGENTE: {agent_name}
 • Tamanho do Output: {output_length} caracteres
@@ -613,21 +575,20 @@ def agent_output_quality_checker(
 • Clareza: {'Boa' if output_length > 50 else 'Limitada'}
 
 """
-        
+
         return analysis_report
-        
+
     except Exception as e:
         return f"Erro na verificação de qualidade dos outputs: {str(e)}"
 
-def tool_usage_evaluator(
-    tools_used: dict, task_requirements: Optional[dict] = None
-) -> str:
+
+def tool_usage_evaluator(tools_used: dict, task_requirements: Optional[dict] = None) -> str:
     """
     Analisa se as ferramentas foram utilizadas adequadamente por cada agente
     """
     try:
         evaluation_report = "=== AVALIAÇÃO DO USO DE FERRAMENTAS ===\n\n"
-        
+
         for agent_name, agent_tools in tools_used.items():
             evaluation_report += f"""
 🔧 AGENTE: {agent_name}
@@ -637,7 +598,7 @@ def tool_usage_evaluator(
 • Sugestões: {'Verificar se as ferramentas são específicas para as tarefas executadas'}
 
 """
-        
+
         # Recomendações gerais
         evaluation_report += """
 🎯 RECOMENDAÇÕES GERAIS:
@@ -646,26 +607,25 @@ def tool_usage_evaluator(
 • Avaliar se existem ferramentas subutilizadas que poderiam melhorar a performance
 • Implementar ferramentas de colaboração entre agentes quando necessário
         """
-        
+
         return evaluation_report
-        
+
     except Exception as e:
         return f"Erro na avaliação do uso de ferramentas: {str(e)}"
 
-def workflow_efficiency_analyzer(
-    workflow_data: dict, execution_timeline: Optional[list] = None
-) -> str:
+
+def workflow_efficiency_analyzer(workflow_data: dict, execution_timeline: Optional[list] = None) -> str:
     """
     Avalia a eficiência do fluxo de trabalho entre agentes, identificando gargalos e pontos de melhoria
     """
     try:
         analysis_report = "=== ANÁLISE DE EFICIÊNCIA DO FLUXO DE TRABALHO ===\n\n"
-        
+
         # Análise básica do fluxo
-        agents_count = workflow_data.get('agents_count', 0)
-        tasks_count = workflow_data.get('tasks_count', 0)
-        duration = workflow_data.get('duration', 'N/A')
-        
+        agents_count = workflow_data.get("agents_count", 0)
+        tasks_count = workflow_data.get("tasks_count", 0)
+        duration = workflow_data.get("duration", "N/A")
+
         analysis_report += f"""
 📋 VISÃO GERAL DO FLUXO:
 • Agentes Envolvidos: {agents_count}
@@ -684,24 +644,23 @@ def workflow_efficiency_analyzer(
 • Avaliar se há agentes subutilizados
 • Implementar sistema de feedback entre agentes
         """
-        
+
         return analysis_report
-        
+
     except Exception as e:
         return f"Erro na análise de eficiência do fluxo: {str(e)}"
 
-def recommendation_generator(
-    analysis_results: dict, improvement_areas: Optional[list] = None
-) -> str:
+
+def recommendation_generator(analysis_results: dict, improvement_areas: Optional[list] = None) -> str:
     """
     Gera recomendações específicas e acionáveis para melhorar agentes, ferramentas e tarefas
     """
     try:
         if improvement_areas is None:
-            improvement_areas = ['agents', 'tools', 'tasks', 'workflow']
-        
+            improvement_areas = ["agents", "tools", "tasks", "workflow"]
+
         recommendations = "=== RECOMENDAÇÕES DE MELHORIA ===\n\n"
-        
+
         # Recomendações para Agentes
         recommendations += """
 🤖 MELHORIAS NOS AGENTES:
@@ -716,7 +675,7 @@ def recommendation_generator(
    • Verificar se os agentes têm conhecimento suficiente para suas tarefas
 
 """
-        
+
         # Recomendações para Ferramentas
         recommendations += """
 🔧 OTIMIZAÇÃO DE FERRAMENTAS:
@@ -731,7 +690,7 @@ def recommendation_generator(
    • Implementar ferramentas de controle de qualidade
 
 """
-        
+
         # Recomendações para Tarefas
         recommendations += """
 📋 REFINAMENTO DE TAREFAS:
@@ -746,7 +705,7 @@ def recommendation_generator(
    • Implementar sistema de validação de entregas
 
 """
-        
+
         # Priorização
         recommendations += """
 🎯 PRIORIZAÇÃO DAS MELHORIAS:
@@ -765,11 +724,12 @@ def recommendation_generator(
    • Otimizações de performance menores
    • Melhorias cosméticas na documentação
         """
-        
+
         return recommendations
-        
+
     except Exception as e:
         return f"Erro na geração de recomendações: {str(e)}"
+
 
 def execution_summary_builder(crew_data: dict, execution_results: dict) -> str:
     """
@@ -777,7 +737,7 @@ def execution_summary_builder(crew_data: dict, execution_results: dict) -> str:
     """
     try:
         summary = "=== RESUMO ESTRUTURADO DA EXECUÇÃO ===\n\n"
-        
+
         # Informações básicas
         summary += f"""
 📊 INFORMAÇÕES BÁSICAS:
@@ -788,28 +748,28 @@ def execution_summary_builder(crew_data: dict, execution_results: dict) -> str:
 • Timestamp: {execution_results.get('timestamp', 'N/A')}
 
 """
-        
+
         # Análise dos agentes
-        agents = crew_data.get('agents', [])
+        agents = crew_data.get("agents", [])
         summary += f"👥 AGENTES ENVOLVIDOS ({len(agents)}):\n"
         for i, agent in enumerate(agents, 1):
-            agent_role = getattr(agent, 'role', 'N/A') if hasattr(agent, 'role') else 'N/A'
-            agent_tools = getattr(agent, 'tools', []) if hasattr(agent, 'tools') else []
+            agent_role = getattr(agent, "role", "N/A") if hasattr(agent, "role") else "N/A"
+            agent_tools = getattr(agent, "tools", []) if hasattr(agent, "tools") else []
             summary += f"   {i}. {agent_role} - {len(agent_tools)} ferramentas\n"
-        
+
         summary += "\n"
-        
+
         # Análise das tarefas
-        tasks = crew_data.get('tasks', [])
+        tasks = crew_data.get("tasks", [])
         summary += f"📋 TAREFAS EXECUTADAS ({len(tasks)}):\n"
         for i, task in enumerate(tasks, 1):
-            task_desc = getattr(task, 'description', 'N/A') if hasattr(task, 'description') else 'N/A'
+            task_desc = getattr(task, "description", "N/A") if hasattr(task, "description") else "N/A"
             summary += f"   {i}. {task_desc[:100]}{'...' if len(task_desc) > 100 else ''}\n"
-        
+
         summary += "\n"
-        
+
         # Resultado final
-        result = execution_results.get('result', '')
+        result = execution_results.get("result", "")
         result_length = len(str(result))
         summary += f"""
 📄 RESULTADO FINAL:
@@ -817,8 +777,8 @@ def execution_summary_builder(crew_data: dict, execution_results: dict) -> str:
 • Qualidade Aparente: {'Boa' if result_length > 500 else 'Limitada' if result_length > 100 else 'Insuficiente'}
 • Completude: {'Completo' if result_length > 200 else 'Incompleto'}
 """
-        
+
         return summary
-        
+
     except Exception as e:
         return f"Erro na construção do resumo de execução: {str(e)}"
